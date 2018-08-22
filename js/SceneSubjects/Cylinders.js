@@ -1,4 +1,4 @@
-function Cylinders(scene, radiusTop, radiusBottom, height, positionY) {
+function Cylinder(scene, radiusTop, radiusBottom, height, positionY) {
 
 	// const radius = 2;
   const numberSegments = 60;
@@ -7,12 +7,12 @@ function Cylinders(scene, radiusTop, radiusBottom, height, positionY) {
   );
 
   // const material = new THREE.MeshBasicMaterial({ color: 0xff00ff });
-  const material = new THREE.MeshStandardMaterial({ flatShading: false });
-	const mesh = new THREE.Mesh(geometry, material );
+  const material = new THREE.MeshStandardMaterial({ flatShading: false, roughness: 1.0 });
+	this.mesh = new THREE.Mesh(geometry, material );
 
-	mesh.position.set(0, positionY, 0);
+	this.mesh.position.set(0, positionY, 0);
 
-	scene.add(mesh);
+	scene.add(this.mesh);
 
 	this.update = function(time) {
 		const scale = Math.sin(time)+2;

@@ -1,6 +1,6 @@
-function GeneralLights(scene,intensity, distance,x,y,z) {
+function GeneralLights(scene,intensity, color, distance,x,y,z) {
 
-	const light = new THREE.PointLight("#ffffff", intensity, distance);
+	const light = new THREE.PointLight(color, intensity, distance);
 		light.position.set(x,y,z);
 
     scene.add(light);
