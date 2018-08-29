@@ -10,14 +10,31 @@ function SceneManager(canvas) {
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     this.camera = buildCamera(screenDimensions);
-    this.anchorPointList = createAnchors(this.scene);
     this.sceneSubjects = createSceneSubjects(this.scene);
     // this.controls = new THREE.OrbitControls( this.camera );
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 200, 200 );
     this.offset = new THREE.Vector3();
 
+    let anchors = createAnchors(this.scene);
 
+    this.grid = new Grid(this.scene, 20, anchors);
+
+//doublecheck scope - this is scene subjects, the other is window
+    // eventBus.subscribe("updatePlaneColor", (mouseX) => {
+    //     console.log(this);
+    //     this.grid.changePlaneColor(mouseX);
+
+    //     // this.grid.plane.material.color.set(0x00ff00);
+    // })
+    eventBus.subscribe("updatePlaneColor", (mouseX)=>{
+        // console.log(this);
+        // debugger;
+        this.grid.changePlaneColor(mouseX);
+
+        // this.grid.plane.material.color.set(0x00ff00);
+    })
+    
     // this.cameraZposition = new THREE.Group();
     // this.cameraXrotation = new THREE.Group();
 
@@ -31,7 +48,18 @@ function SceneManager(canvas) {
     // const gui = new dat.GUI();
     // gui.add(this.cameraXrotation.rotation, 'x', Math.PI-.5, Math.PI+.5);
 
-    
+    function createAnchors(scene) {
+        anchorPointList = [];
+        let startingDims = [[10, 10], [10, -10]];
+        startingDims.forEach(function (dims) {
+            anchorPt = new AnchorPoint(scene, dims[0], dims[1]);
+            anchorPointList.push(anchorPt);
+            // sceneSubjects.push(anchorPt);
+        }
+        )
+        return anchorPointList;
+    }
+
     function buildScene() {
         const scene = new THREE.Scene();
         scene.background = new THREE.Color("#000");
@@ -75,75 +103,71 @@ function SceneManager(canvas) {
             var y1 = pt1.position.y;
             var x2 = pt2.position.x;
             var y2 = pt2.position.y;
-            cylinder = new Cylinder(scene, x1-anchorPointDistance, x2-anchorPointDistance, y1-y2, (y1+y2)/2.0)
-            // scene, radiusTop, radiusBottom, height, positionY
+            cylinder = new Cylinder(scene, x1-anchorPointDistance, x2-anchorPointDistance, y1-y2, (y1+y2)/2.0);
             cylinders.push(cylinder);
         }
 
         return cylinders
     }
 
-    function createAnchors(scene){
-        anchorPointList = [];
-        let startingDims = [[10, 10], [10, -10]];
-        startingDims.forEach(function (dims) {
-            anchorPt = new AnchorPoint(scene, dims[0], dims[1]);
-            anchorPointList.push(anchorPt);
-            // sceneSubjects.push(anchorPt);
-        }
-        )
-        return anchorPointList;
-    }
 
-    function createSceneSubjects(scene, anchorPointList) {
+
+    function createSceneSubjects(scene) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // let startingDims = [[10, 10], [10, -10]];
-        // startingDims.forEach((x,y) => populateDims(x, y))
-        // start
-
-        // var anchorPointList = [];
-        const sceneSubjects = [
-            new GeneralLights(scene, 1, "#ffffff",0,0,0,-20),
+        let sceneSubjects = [
+            new GeneralLights(scene, 1, "#ffffff",30,0,0,-50),
+            new GeneralLights(scene, 1, "#ffffff",-30,0,0,-50),
             new GeneralLights(scene, .5, "#ff00ff",0,0,-100,0),
             new GeneralLights(scene, .5, "#ff00ff",0,0,100,0),
-            // new GeneralLights(scene, 1,0,50,0,-20),
-
-            // new SceneSubject(scene),
-            // new Cylinder(scene, 10,5,10,-10),
-            // new Cylinder(scene, 2,10,10,0),
-            // new Cylinder(scene, 10,2,10,10),
-            // new AnchorPoints(scene, 10, 5)
         ];
-        // startingDims.forEach(function(dims){
-        //     anchorPt = new AnchorPoint(scene, dims[0], dims[1]);
-        //     anchorPointList.push(anchorPt);
-        //     sceneSubjects.push(anchorPt);
-        //     }
-        // )
 
+        sceneSubjects.forEach(function(light){
+            eventBus.subscribe("updateLightColor", (mouseX) => {
+                light.changeLightColor(mouseX);
+                
+            })
+        })
 
-        // for(var i=0;i<startingDims.length;i++){
-        //     anchorPt = new AnchorPoint(scene,startingDims[i][0], startingDims[i][1]);
-        //     this.anchorPointList.push(anchorPt);
-        //     sceneSubjects.push(anchorPt);
-
-        // }
-
-        sceneSubjects.concat(anchorPointList);
-        
-        sceneSubjects.concat(buildCylinders(scene));
-        // console.log(sceneSubjects[2]);
         return sceneSubjects;
     }
 
     this.update = function() {
         // this.controls.update();
-        const elapsedTime = clock.getElapsedTime();
+        renderer.clear();
 
-        for(let i=0; i<this.sceneSubjects.length; i++)
-        	this.sceneSubjects[i].update(elapsedTime);
+
+        if(this.grid){
+            this.grid.gridPointList.forEach(function (obj) {
+                this.scene.remove(obj);
+                obj.geometry.dispose();
+                obj.material.dispose();
+            }, this)
+
+
+
+        }
+
+        const elapsedTime = clock.getElapsedTime();
+        if(this.cyls){
+            this.cyls.forEach(function(obj){
+                obj = obj.mesh;
+                this.scene.remove(obj);
+                obj.geometry.dispose();
+                obj.material.dispose();
+            },this)
+        }
+        this.grid.makeGridPoints(this.scene)
+
+        this.cyls = buildCylinders(this.scene);
 
         renderer.render(this.scene, this.camera);
+
+        this.clearGeometry = function(obj) {
+            this.scene.remove(obj);
+            obj.geometry.dispose();
+            obj.material.dispose();
+        }
+
     }
 
     this.onWindowResize = function() {
@@ -158,3 +182,4 @@ function SceneManager(canvas) {
         renderer.setSize(width, height);
     }
 }
+

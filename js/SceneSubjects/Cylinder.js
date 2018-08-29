@@ -1,4 +1,6 @@
 function Cylinder(scene, radiusTop, radiusBottom, height, positionY) {
+	this.radiusTop = radiusTop;
+	this.radiusBottom = radiusBottom;
 
 	// const radius = 2;
   const numberSegments = 60;
@@ -14,9 +16,12 @@ function Cylinder(scene, radiusTop, radiusBottom, height, positionY) {
 
 	scene.add(this.mesh);
 
-	this.update = function(time) {
-		const scale = Math.sin(time)+2;
-
-		// mesh.scale.set(scale/2, 1, 1);
+	// eventBus.subscribe()
+	
+	this.update = function(time){
+		
+		// const scale = Math.sin(time)+2;	
+		// this.mesh.radiusTop=time*5;
+		// this.mesh.position.set(time,0,0);
 	}
 }

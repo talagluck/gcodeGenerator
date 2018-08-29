@@ -1,13 +1,15 @@
 function EventBus() {
-    this.eventCallbacksPairs = [];
+    this.eventCallbacksPairsList = [];
 
     this.subscribe = function (eventType, callback) {
         const eventCallbacksPair = findEventCallbacksPair(eventType);
 
         if (eventCallbacksPair)
             eventCallbacksPair.callbacks.push(callback);
-        else
-            eventCallbacksPairs.push(new EventCallbacksPair(eventType, callback));
+        else {
+            this.eventCallbacksPairsList.push(new EventCallbacksPair(eventType, callback));
+        }
+            
     }
 
     this.post = function (eventType, args) {
@@ -22,7 +24,7 @@ function EventBus() {
     }
 
     findEventCallbacksPair = eventType => {
-        return this.eventCallbacksPairs.find(eventObject => eventObject.eventType === eventType);
+        return this.eventCallbacksPairsList.find(eventObject => eventObject.eventType === eventType);
     }
 
     function EventCallbacksPair(eventType, callback) {
@@ -31,4 +33,4 @@ function EventBus() {
     }
 }
 
-// export default EventBus;
+const eventBus = new EventBus();
