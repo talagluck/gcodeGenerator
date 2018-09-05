@@ -4,7 +4,7 @@
 	<title>Three.js</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body oncontextmenu="return false">
 	<!-- <div id="webgl"></div> -->
 	<canvas id="canvas"></canvas>
 
@@ -15,9 +15,14 @@
 	<script src="./js/libs/numeric.js"></script>
 	<script src="./js/libs/OrbitControls.js"></script>
 	<script src="./js/libs/STLLoader.js"></script>
+	<script src="./js/helpers.js"></script>
 	<script src="./js/EventBus.js"></script>
 	<script src="./js/sceneSubjects/Cylinder.js"></script>
-	<script src="./js/sceneSubjects/Grid.js"></script>
+	<script src="./js/sceneSubjects/SpiralCurve.js"></script>
+	<script src="./js/sceneSubjects/GridPlane.js"></script>
+	<script src="./js/sceneSubjects/Lathe.js"></script>
+	<!-- <script src="./js/sceneSubjects/Grid.js"></script> -->
+	<script src="./js/sceneSubjects/GridPoint.js"></script>
 	<script src="./js/sceneSubjects/HelperPlane.js"></script>
 	<script src="js/sceneSubjects/GeneralLights.js"></script>
 	<script src="js/sceneSubjects/AnchorPoints.js"></script>

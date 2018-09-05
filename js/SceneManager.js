@@ -1,7 +1,7 @@
 function SceneManager(canvas) {
 
-    const clock = new THREE.Clock();
-
+    // const clock = new THREE.Clock();
+    const segments = 20;
     const screenDimensions = {
         width: canvas.width,
         height: canvas.height
@@ -11,15 +11,16 @@ function SceneManager(canvas) {
     const renderer = buildRender(screenDimensions);
     this.camera = buildCamera(screenDimensions);
     this.sceneSubjects = createSceneSubjects(this.scene);
-    // this.controls = new THREE.OrbitControls( this.camera );
+    this.controls = new THREE.OrbitControls( this.camera );
     this.raycaster = new THREE.Raycaster();
-    this.plane = new HelperPlane(this.scene, 200, 200 );
+    this.plane = new HelperPlane(this.scene, 400, 400 );
     this.offset = new THREE.Vector3();
 
-    let anchors = createAnchors(this.scene);
-
-    this.grid = new Grid(this.scene, 20, anchors);
-
+    this.anchorPointList = createFirstAnchors(this.scene);
+    this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
+    // this.grid = new Grid(this.scene, segments, this.anchorPointList);
+    this.gridPointList = makeGridPoints(this.scene, segments);
+ 
 //doublecheck scope - this is scene subjects, the other is window
     // eventBus.subscribe("updatePlaneColor", (mouseX) => {
     //     console.log(this);
@@ -27,13 +28,7 @@ function SceneManager(canvas) {
 
     //     // this.grid.plane.material.color.set(0x00ff00);
     // })
-    eventBus.subscribe("updatePlaneColor", (mouseX)=>{
-        // console.log(this);
-        // debugger;
-        this.grid.changePlaneColor(mouseX);
 
-        // this.grid.plane.material.color.set(0x00ff00);
-    })
     
     // this.cameraZposition = new THREE.Group();
     // this.cameraXrotation = new THREE.Group();
@@ -48,7 +43,33 @@ function SceneManager(canvas) {
     // const gui = new dat.GUI();
     // gui.add(this.cameraXrotation.rotation, 'x', Math.PI-.5, Math.PI+.5);
 
-    function createAnchors(scene) {
+    // this.updateGridPoints = function (scene) {
+    //     this.gridPointList.forEach(function (gridPoint) {
+    //         destroyOnUpdateMesh(scene, gridPoint);
+    //     })
+    //     this.gridPointList = makeGridPoints(scene, size);
+    // }
+    
+    function makeGridPoints (scene, numberSegments) {
+        const gridPointList = [];
+        const anchorPointYs = this.anchorPointList.map(obj => obj.mesh.position.y)
+        for (let i = 0; i <= numberSegments; i++) {
+            // if anchorpoint not nearby
+            let yDim = (i * 5) - 50;
+            let gridPoint = new GridPoint(scene, numberSegments, 10, yDim, 0);
+
+            for (let j = 0; j < anchorPointYs.length; j++) {
+                if (Math.abs(yDim - anchorPointYs[j]) < 2) {
+                    gridPoint.hideGridPoint();
+                }
+            }
+
+            gridPointList.push(gridPoint);
+        }
+        return gridPointList;
+    }
+
+    function createFirstAnchors(scene) {
         anchorPointList = [];
         let startingDims = [[10, 10], [10, -10]];
         startingDims.forEach(function (dims) {
@@ -59,6 +80,43 @@ function SceneManager(canvas) {
         )
         return anchorPointList;
     }
+
+    eventBus.subscribe("addAnchorPoint", () => {
+
+        //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
+        //from the grid point list.
+
+        let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
+        // debugger;
+        gridPointIntersect.hideGridPoint();
+        let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
+        let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
+        let newAnchorPt = new AnchorPoint(this.scene, newAnchorPtX, newAnchorPtY);
+        this.anchorPointList.push(newAnchorPt);
+        this.anchorPointList.sort(function (a, b) {
+            return b.mesh.position.y - a.mesh.position.y
+        });
+    }, this)
+
+    eventBus.subscribe("deleteAnchorPoint", () => {
+        this.anchorPointList.forEach(
+            (pt) => {
+                if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid) {
+                    this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
+                    destroyOnUpdateMesh(this.scene, pt.mesh);
+                }
+            }
+        )
+    }, this)
+
+    
+    // function createOtherAnchors(scene,anchorPointList) {
+        
+    //         // sceneSubjects.push(anchorPt);
+    //     }
+    //     )
+    //     return anchorPointList;
+    // }
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -110,63 +168,68 @@ function SceneManager(canvas) {
         return cylinders
     }
 
+    function buildLathe(scene,resolution){
+        // debugger;
+        lathe = new Lathe(scene, this.anchorPointList, resolution);
+        return lathe;
+    }
+    function buildSpiral(scene){
+        // debugger;
+        spiral = new SpiralCurve(scene, this.lathe.curve);
+        return spiral;
+    }
+
 
 
     function createSceneSubjects(scene) {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         let sceneSubjects = [
-            new GeneralLights(scene, 1, "#ffffff",30,0,0,-50),
-            new GeneralLights(scene, 1, "#ffffff",-30,0,0,-50),
-            new GeneralLights(scene, .5, "#ff00ff",0,0,-100,0),
-            new GeneralLights(scene, .5, "#ff00ff",0,0,100,0),
+            new GeneralLights(scene, 1, "#ffffff",0,50,0,-50),
+            new GeneralLights(scene, 1, "#ffffff",0,-50,0,-50),
+            new GeneralLights(scene, 1, "#ffffff",0,0,0,50),
+            new GeneralLights(scene, 1, "#ffffff",0,0,-100,0),
+            new GeneralLights(scene, 1, "#ffffff",0,0,100,0),
         ];
-
-        sceneSubjects.forEach(function(light){
-            eventBus.subscribe("updateLightColor", (mouseX) => {
-                light.changeLightColor(mouseX);
-                
-            })
-        })
 
         return sceneSubjects;
     }
 
     this.update = function() {
-        // this.controls.update();
+        this.controls.update();
         renderer.clear();
 
-
+        // this.grid.makeGridPoints(this.scene);
         if(this.grid){
-            this.grid.gridPointList.forEach(function (obj) {
-                this.scene.remove(obj);
-                obj.geometry.dispose();
-                obj.material.dispose();
-            }, this)
+            this.grid.update(this.scene)
+            // this.grid.gridPointList.forEach(function (obj) {
 
+            //     destroyOnUpdateMesh(this.scene, obj);
 
+            // }, this)
+        } 
+        // else {
+        //     this.grid.makeGridPoints(this.scene);
+        // }
+
+        if(this.lathe){
+            destroyOnUpdateMesh(this.scene, this.lathe.mesh);
+            // destroyOnUpdateMesh(this.scene, this.lathe.line);
 
         }
-
-        const elapsedTime = clock.getElapsedTime();
-        if(this.cyls){
-            this.cyls.forEach(function(obj){
-                obj = obj.mesh;
-                this.scene.remove(obj);
-                obj.geometry.dispose();
-                obj.material.dispose();
-            },this)
+        if(this.spiral){
+            destroyOnUpdateMesh(this.scene, this.spiral.line);
+            // this.scene.remove(this.spiral.line);
+            // this.spiral.lineGeo.dispose();
         }
-        this.grid.makeGridPoints(this.scene)
 
-        this.cyls = buildCylinders(this.scene);
+        
+
+        this.lathe = buildLathe(this.scene,50);
+        this.spiral = buildSpiral(this.scene);
+
+        // this.cyls = buildCylinders(this.scene);
 
         renderer.render(this.scene, this.camera);
-
-        this.clearGeometry = function(obj) {
-            this.scene.remove(obj);
-            obj.geometry.dispose();
-            obj.material.dispose();
-        }
 
     }
 

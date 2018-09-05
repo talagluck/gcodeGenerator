@@ -1,4 +1,4 @@
-function AnchorPoint(scene, x, y, list) {
+function AnchorPoint(scene, x, y) {
 
     // const radius = 2;
     const numberSegments = 20;
@@ -12,13 +12,21 @@ function AnchorPoint(scene, x, y, list) {
     this.mesh.position.set(x, y, 0);
 
     scene.add(this.mesh);
-    // list.push({
-    //     'x': x,
-    //     'y': y
-    // })
 
-    this.update = function () {
+    // this.deleteAnchorPoint = function (mouseX) {
+    //     debugger;
+    //     sceneManager.grid.anchorPointList.forEach(
+    //         (pt) => {
+    //             if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid){
+    //             sceneManager.grid.anchorPointList.splice( sceneManager.grid.anchorPointList.indexOf(pt),1);
+    //             }
+    //         }
+    //     )
+    // }
+
+    
+    this.update = function () {}
 
         // mesh.scale.set(scale/2, 1, 1);
-    }
+    
 }
