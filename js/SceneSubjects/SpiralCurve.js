@@ -1,14 +1,14 @@
-function SpiralCurve(scene, curve) {
+function SpiralCurve(scene, curve, gui) {
     this.curve = curve;
     // const revolutions = 20;
     
-    const curveResolution = 1000;
-    const spiralResolution = 100;
+    const curveResolution = eventBus.state.curveResolution;
+    const spiralResolution = eventBus.state.spiralResolution;
     const points = this.curve.getPoints(curveResolution);
     const bottomY = this.curve.points[this.curve.points.length-1].y;
     const topY = this.curve.points[0].y;
     const totalHeight = topY - bottomY;
-    const slope = .5;
+    const slope = eventBus.state.spiralSlope;
     let deltaY = totalHeight / spiralResolution;
 
     let deltaT = deltaY / slope;
@@ -83,6 +83,10 @@ function SpiralCurve(scene, curve) {
     this.line = new THREE.Line(this.lineGeo,lineMat);
 
     scene.add(this.line);
+    this.line.visible = eventBus.state.spiralVisible;
+    this.spiralVisible = gui.add(this.line, 'visible').name('show spiral');
+    this.spiralVisible.onFinishChange(() => { eventBus.state.spiralVisible = this.line.visible })
+
 
     // eventBus.subscribe()
 

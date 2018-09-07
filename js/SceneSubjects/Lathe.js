@@ -1,5 +1,6 @@
-function Lathe(scene, anchorPointList,resolution) {
+function Lathe(scene, anchorPointList,resolution, gui, eventBus) {
     let curvePointList=[]
+    // const opacity = 0.2
 
     anchorPointList.forEach(element => {
         let newPoint = new THREE.Vector2(element.mesh.position.x, element.mesh.position.y);   
@@ -13,14 +14,30 @@ function Lathe(scene, anchorPointList,resolution) {
 
     // const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
     // const material = new THREE.MeshBasicMaterial({ flatShading: false, side: THREE.DoubleSide, transparent: true, opacity: 0.6, color: 0xff00ff  });
-    const material = new THREE.MeshStandardMaterial({ depthTest: false, side: THREE.DoubleSide, transparent: true, opacity: 0.2, color: 0xffffff,roughness:.8,metalness:1.0  });
+    const material = new THREE.MeshStandardMaterial(
+        { depthTest: false, 
+          side: THREE.DoubleSide, 
+          transparent: true, 
+          color: 0xffffff,
+          opacity:eventBus.state.latheOpacity,
+          roughness:.8,
+          metalness:1.0,
+        }
+    );
 
 
     this.mesh = new THREE.Mesh(geometry, material);
     // this.line = new THREE.Line(this.lineGeo,lineMat);
-
+    this.mesh.visible = eventBus.state.latheVisible;
     scene.add(this.mesh);
     // scene.add(this.line);
+    this.latheVisible = gui.add(this.mesh, 'visible').name('show lathe');
+    this.latheVisible.onFinishChange(()=>{eventBus.state.latheVisible=this.mesh.visible})
+
+    this.latheOpacity = gui.add(this.mesh.material, 'opacity',0,1).name('opacity');
+    this.latheOpacity.onChange(() => { eventBus.state.latheOpacity = this.mesh.material.opacity})
+
+    // this.curveVisible = gui.add(this.curve, 'visible').name('spline visible');
 
     this.changeLatheColor = function (mouseX) {
         // debugger;

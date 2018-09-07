@@ -37,6 +37,8 @@ function bindEventListeners() {
 }
 
 function onMouseClick(event) {
+	event.preventDefault();
+
 	const elapsedTime = clock.getElapsedTime();
 	// calculate mouse position in normalized device coordinates
 	// (-1 to +1) for both components
@@ -66,10 +68,12 @@ function onMouseClick(event) {
 		// debugger;
 		// eventBus.post("updatePlaneColor", gridPointIntersects[0].point.y);
 
-//whichever grid point was selected, conver that to an anchor point, 
+//whichever grid point was selected, convert that to an anchor point, 
 //then repop and sort anchor point list, then remove from grid point list
-		eventBus.post("addAnchorPoint",gridPointIntersects[0].object);
+		eventBus.post("addAnchorPoint");
 		eventBus.post("updateLightColor", mouseY);
+		eventBus.post("buildNewLathe")
+		eventBus.post("buildNewSpiral")
 
 	}
 }
@@ -122,9 +126,10 @@ function onMouseMove ( event ){
 		}
 
 		let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
-		console.log(gridPointsToShow.length);
 		// let hiddenGridPoints = sceneManager.gridPointList.filter(obj => obj.meshAttr().visible === false);
-		gridPointsToShow.map(obj => obj.showGridPoint())
+		gridPointsToShow.map(obj => obj.showGridPoint());
+		eventBus.post("buildNewLathe");
+		eventBus.post("buildNewSpiral");
 
 
 
@@ -137,7 +142,6 @@ function onMouseMove ( event ){
 }
 
 function onMouseUp( event ){
-	// console.log("yup");
 	sceneManager.selection = null;
 	sceneManager.controls.enabled = true;
 
@@ -161,6 +165,8 @@ function onMouseRight( event ){
 		if (anchorPointIntersects.length > 0 && sceneManager.anchorPointList.length>2 ) {
 			sceneManager.selection.position.copy(anchorPointIntersects[0].point.sub(sceneManager.offset));
 			eventBus.post("deleteAnchorPoint", mouseX,sceneManager.anchorPointList);
+			eventBus.post("buildNewLathe");
+			eventBus.post("buildNewSpiral");
 		}
 	}
 }

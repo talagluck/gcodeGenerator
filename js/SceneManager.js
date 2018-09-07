@@ -6,12 +6,19 @@ function SceneManager(canvas) {
         width: canvas.width,
         height: canvas.height
     }
+    const gui = new dat.GUI();
+    const curveResGUI = gui.add(eventBus.state,'curveResolution',1,200).name('curve resolution');
+    curveResGUI.onChange(()=>eventBus.post('buildNewSpiral'))
+    const spiralResGUI = gui.add(eventBus.state,'spiralResolution',100,3000).name('spiral resolution');
+    spiralResGUI.onChange(() => eventBus.post('buildNewSpiral'))
+    const spiralSlopeGUI = gui.add(eventBus.state, 'spiralSlope', 0.0001, 0.1).name('spiral density');
+    spiralSlopeGUI.onChange(() => eventBus.post('buildNewSpiral'))
 
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     this.camera = buildCamera(screenDimensions);
     this.sceneSubjects = createSceneSubjects(this.scene);
-    this.controls = new THREE.OrbitControls( this.camera );
+    this.controls = new THREE.OrbitControls( this.camera,canvas);
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
     this.offset = new THREE.Vector3();
@@ -20,36 +27,10 @@ function SceneManager(canvas) {
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     // this.grid = new Grid(this.scene, segments, this.anchorPointList);
     this.gridPointList = makeGridPoints(this.scene, segments);
- 
-//doublecheck scope - this is scene subjects, the other is window
-    // eventBus.subscribe("updatePlaneColor", (mouseX) => {
-    //     console.log(this);
-    //     this.grid.changePlaneColor(mouseX);
-
-    //     // this.grid.plane.material.color.set(0x00ff00);
-    // })
-
     
-    // this.cameraZposition = new THREE.Group();
-    // this.cameraXrotation = new THREE.Group();
+    this.lathe = buildLathe(this.scene,50, gui,eventBus);
+    this.spiral = buildSpiral(this.scene, this.lathe, gui);
 
-    // this.cameraZposition.add(this.camera);
-    // this.cameraXrotation.add(this.cameraZposition);
-    // this.scene.add(this.cameraXrotation);
-
-    // this.cameraZposition.position.z = 100;
-    // this.cameraXrotation.rotation.x = 2.9;
-
-    // const gui = new dat.GUI();
-    // gui.add(this.cameraXrotation.rotation, 'x', Math.PI-.5, Math.PI+.5);
-
-    // this.updateGridPoints = function (scene) {
-    //     this.gridPointList.forEach(function (gridPoint) {
-    //         destroyOnUpdateMesh(scene, gridPoint);
-    //     })
-    //     this.gridPointList = makeGridPoints(scene, size);
-    // }
-    
     function makeGridPoints (scene, numberSegments) {
         const gridPointList = [];
         const anchorPointYs = this.anchorPointList.map(obj => obj.mesh.position.y)
@@ -81,6 +62,8 @@ function SceneManager(canvas) {
         return anchorPointList;
     }
 
+    // eventBus.subscribe()
+
     eventBus.subscribe("addAnchorPoint", () => {
 
         //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
@@ -108,6 +91,29 @@ function SceneManager(canvas) {
             }
         )
     }, this)
+    eventBus.subscribe("buildNewLathe", () => {
+        if(this.lathe){
+
+            destroyOnUpdateMesh(this.scene,this.lathe.mesh);
+            gui.remove(this.lathe.latheVisible);
+            gui.remove(this.lathe.latheOpacity);
+            
+
+        }
+        this.lathe = buildLathe(this.scene, 50, gui,eventBus)
+
+    })
+    eventBus.subscribe("buildNewSpiral", () => {
+        if(this.spiral){
+            destroyOnUpdateMesh(this.scene,this.spiral.line);
+            gui.remove(this.spiral.spiralVisible);
+
+        }
+        this.spiral = buildSpiral(this.scene,this.lathe,gui)
+
+    })
+
+
 
     
     // function createOtherAnchors(scene,anchorPointList) {
@@ -168,14 +174,14 @@ function SceneManager(canvas) {
         return cylinders
     }
 
-    function buildLathe(scene,resolution){
+    function buildLathe(scene, resolution){
         // debugger;
-        lathe = new Lathe(scene, this.anchorPointList, resolution);
+        lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
         return lathe;
     }
-    function buildSpiral(scene){
+    function buildSpiral(scene,lathe, visible){
         // debugger;
-        spiral = new SpiralCurve(scene, this.lathe.curve);
+        spiral = new SpiralCurve(scene, lathe.curve,gui);
         return spiral;
     }
 
@@ -201,36 +207,9 @@ function SceneManager(canvas) {
         // this.grid.makeGridPoints(this.scene);
         if(this.grid){
             this.grid.update(this.scene)
-            // this.grid.gridPointList.forEach(function (obj) {
-
-            //     destroyOnUpdateMesh(this.scene, obj);
-
-            // }, this)
-        } 
-        // else {
-        //     this.grid.makeGridPoints(this.scene);
-        // }
-
-        if(this.lathe){
-            destroyOnUpdateMesh(this.scene, this.lathe.mesh);
-            // destroyOnUpdateMesh(this.scene, this.lathe.line);
-
+    
         }
-        if(this.spiral){
-            destroyOnUpdateMesh(this.scene, this.spiral.line);
-            // this.scene.remove(this.spiral.line);
-            // this.spiral.lineGeo.dispose();
-        }
-
-        
-
-        this.lathe = buildLathe(this.scene,50);
-        this.spiral = buildSpiral(this.scene);
-
-        // this.cyls = buildCylinders(this.scene);
-
         renderer.render(this.scene, this.camera);
-
     }
 
     this.onWindowResize = function() {

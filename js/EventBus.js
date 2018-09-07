@@ -1,4 +1,11 @@
 function EventBus() {
+    this.state={spiralVisible:false,
+                latheVisible:true,
+                latheOpacity: 0.7,
+                curveResolution: 1000,
+                spiralResolution: 2000,   
+                spiralSlope: 0.2         
+    }
     this.eventCallbacksPairsList = [];
 
     this.subscribe = function (eventType, callback) {
