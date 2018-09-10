@@ -17,7 +17,7 @@ function SceneManager(canvas) {
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     this.camera = buildCamera(screenDimensions);
-    this.sceneSubjects = createSceneSubjects(this.scene);
+    this.lights = buildLights(this.scene);
     this.controls = new THREE.OrbitControls( this.camera,canvas);
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
@@ -25,7 +25,6 @@ function SceneManager(canvas) {
 
     this.anchorPointList = createFirstAnchors(this.scene);
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
-    // this.grid = new Grid(this.scene, segments, this.anchorPointList);
     this.gridPointList = makeGridPoints(this.scene, segments);
     
     this.lathe = buildLathe(this.scene,50, gui,eventBus);
@@ -56,13 +55,10 @@ function SceneManager(canvas) {
         startingDims.forEach(function (dims) {
             anchorPt = new AnchorPoint(scene, dims[0], dims[1]);
             anchorPointList.push(anchorPt);
-            // sceneSubjects.push(anchorPt);
         }
         )
         return anchorPointList;
     }
-
-    // eventBus.subscribe()
 
     eventBus.subscribe("addAnchorPoint", () => {
 
@@ -112,17 +108,6 @@ function SceneManager(canvas) {
         this.spiral = buildSpiral(this.scene,this.lathe,gui)
 
     })
-
-
-
-    
-    // function createOtherAnchors(scene,anchorPointList) {
-        
-    //         // sceneSubjects.push(anchorPt);
-    //     }
-    //     )
-    //     return anchorPointList;
-    // }
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -175,29 +160,28 @@ function SceneManager(canvas) {
     }
 
     function buildLathe(scene, resolution){
-        // debugger;
         lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
         return lathe;
     }
     function buildSpiral(scene,lathe, visible){
-        // debugger;
         spiral = new SpiralCurve(scene, lathe.curve,gui);
         return spiral;
     }
 
-
-
-    function createSceneSubjects(scene) {
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        let sceneSubjects = [
-            new GeneralLights(scene, 1, "#ffffff",0,50,0,-50),
-            new GeneralLights(scene, 1, "#ffffff",0,-50,0,-50),
-            new GeneralLights(scene, 1, "#ffffff",0,0,0,50),
-            new GeneralLights(scene, 1, "#ffffff",0,0,-100,0),
-            new GeneralLights(scene, 1, "#ffffff",0,0,100,0),
-        ];
-
-        return sceneSubjects;
+    function buildLights(scene) {
+        // distance, x, y, z
+        const cameraParams = [
+            [0, 50, 0, -50],
+            [0, -50, 0, -50],
+            [0, 0, 0, 50],
+            [0, 0, -100, 0],
+            [0, 0, 100, 0]
+        ]
+        
+        const lights = cameraParams.map( 
+            cp => new GeneralLights(scene, 1, "#ffffff", ...cp)
+        )
+        return lights
     }
 
     this.update = function() {
