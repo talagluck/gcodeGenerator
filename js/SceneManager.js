@@ -37,11 +37,13 @@ function SceneManager(canvas) {
             let yDim = (i * 5) - 50;
             let gridPoint = new GridPoint(scene, numberSegments, 10, yDim, 0);
 
-            for (let j = 0; j < anchorPointYs.length; j++) {
-                if (Math.abs(yDim - anchorPointYs[j]) < 2) {
-                    gridPoint.hideGridPoint();
+            anchorPointYs.forEach( 
+                (anchorPoint) => {
+                    if (Math.abs(yDim - anchorPoint) < 2) {
+                        gridPoint.hideGridPoint();
+                    } 
                 }
-            }
+            )
 
             gridPointList.push(gridPoint);
         }
@@ -51,61 +53,14 @@ function SceneManager(canvas) {
     function createFirstAnchors(scene) {
         anchorPointList = [];
         let startingDims = [[10, 10], [10, -10]];
-        startingDims.forEach(function (dims) {
-            anchorPt = new AnchorPoint(scene, dims[0], dims[1]);
-            anchorPointList.push(anchorPt);
-        }
+        startingDims.forEach(
+            (dims) => {
+                anchorPt = new AnchorPoint(scene, ...dims);
+                anchorPointList.push(anchorPt);
+            }
         )
         return anchorPointList;
     }
-
-    eventBus.subscribe("addAnchorPoint", () => {
-
-        //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
-        //from the grid point list.
-
-        let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
-        gridPointIntersect.hideGridPoint();
-        let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
-        let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
-        let newAnchorPt = new AnchorPoint(this.scene, newAnchorPtX, newAnchorPtY);
-        this.anchorPointList.push(newAnchorPt);
-        this.anchorPointList.sort(function (a, b) {
-            return b.mesh.position.y - a.mesh.position.y
-        });
-    }, this)
-
-    eventBus.subscribe("deleteAnchorPoint", () => {
-        this.anchorPointList.forEach(
-            (pt) => {
-                if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid) {
-                    this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
-                    destroyOnUpdateMesh(this.scene, pt.mesh);
-                }
-            }
-        )
-    }, this)
-    eventBus.subscribe("buildNewLathe", () => {
-        if(this.lathe){
-
-            destroyOnUpdateMesh(this.scene,this.lathe.mesh);
-            gui.remove(this.lathe.latheVisible);
-            gui.remove(this.lathe.latheOpacity);
-            
-
-        }
-        this.lathe = buildLathe(this.scene, 50, gui,eventBus)
-
-    })
-    eventBus.subscribe("buildNewSpiral", () => {
-        if(this.spiral){
-            destroyOnUpdateMesh(this.scene,this.spiral.line);
-            gui.remove(this.spiral.spiralVisible);
-
-        }
-        this.spiral = buildSpiral(this.scene,this.lathe,gui)
-
-    })
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -137,24 +92,6 @@ function SceneManager(canvas) {
         return camera;
     }
 
-    function buildCylinders(scene) {
-        const anchorPointDistance = 3
-
-        cylinders = []
-        for(var i=0; i<this.anchorPointList.length - 1; i++){
-            var pt1, pt2, x1, y1, x2, y2
-            [pt1, pt2] = [this.anchorPointList[i].mesh, this.anchorPointList[i + 1].mesh]
-            var x1 = pt1.position.x;
-            var y1 = pt1.position.y;
-            var x2 = pt2.position.x;
-            var y2 = pt2.position.y;
-            cylinder = new Cylinder(scene, x1-anchorPointDistance, x2-anchorPointDistance, y1-y2, (y1+y2)/2.0);
-            cylinders.push(cylinder);
-        }
-
-        return cylinders
-    }
-
     function buildLathe(scene, resolution){
         lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
         return lathe;
@@ -179,6 +116,55 @@ function SceneManager(canvas) {
         )
         return lights
     }
+
+    eventBus.subscribe("addAnchorPoint", () => {
+
+        //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
+        //from the grid point list.
+
+        let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
+        gridPointIntersect.hideGridPoint();
+        let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
+        let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
+        let newAnchorPt = new AnchorPoint(this.scene, newAnchorPtX, newAnchorPtY);
+        this.anchorPointList.push(newAnchorPt);
+        this.anchorPointList.sort(function (a, b) {
+            return b.mesh.position.y - a.mesh.position.y
+        });
+    }, this)
+
+    eventBus.subscribe("deleteAnchorPoint", () => {
+        this.anchorPointList.forEach(
+            (pt) => {
+                if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid) {
+                    this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
+                    destroyOnUpdateMesh(this.scene, pt.mesh);
+                }
+            }
+        )
+    }, this)
+
+    eventBus.subscribe("buildNewLathe", () => {
+        if(this.lathe){
+
+            destroyOnUpdateMesh(this.scene,this.lathe.mesh);
+            gui.remove(this.lathe.latheVisible);
+            gui.remove(this.lathe.latheOpacity);
+            
+
+        }
+        this.lathe = buildLathe(this.scene, 50, gui,eventBus)
+
+    })
+    eventBus.subscribe("buildNewSpiral", () => {
+        if(this.spiral){
+            destroyOnUpdateMesh(this.scene,this.spiral.line);
+            gui.remove(this.spiral.spiralVisible);
+
+        }
+        this.spiral = buildSpiral(this.scene,this.lathe,gui)
+
+    })
 
     this.update = function() {
         this.controls.update();
