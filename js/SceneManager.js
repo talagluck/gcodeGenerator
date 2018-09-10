@@ -1,6 +1,5 @@
 function SceneManager(canvas) {
 
-    // const clock = new THREE.Clock();
     const segments = 20;
     const screenDimensions = {
         width: canvas.width,
@@ -16,8 +15,8 @@ function SceneManager(canvas) {
 
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
+    const lights = buildLights(this.scene);
     this.camera = buildCamera(screenDimensions);
-    this.lights = buildLights(this.scene);
     this.controls = new THREE.OrbitControls( this.camera,canvas);
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
@@ -66,7 +65,6 @@ function SceneManager(canvas) {
         //from the grid point list.
 
         let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
-        // debugger;
         gridPointIntersect.hideGridPoint();
         let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
         let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
@@ -135,8 +133,6 @@ function SceneManager(canvas) {
         const farPlane = 1000;
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
         camera.position.z = -100;
-      	// camera.position.x = 100;
-      	// camera.position.y = 10;
       	camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     }
@@ -188,7 +184,6 @@ function SceneManager(canvas) {
         this.controls.update();
         renderer.clear();
 
-        // this.grid.makeGridPoints(this.scene);
         if(this.grid){
             this.grid.update(this.scene)
     
