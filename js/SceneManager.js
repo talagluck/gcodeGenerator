@@ -118,10 +118,8 @@ function SceneManager(canvas) {
     }
 
     eventBus.subscribe("addAnchorPoint", () => {
-
         //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
         //from the grid point list.
-
         let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
         gridPointIntersect.hideGridPoint();
         let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
@@ -146,24 +144,19 @@ function SceneManager(canvas) {
 
     eventBus.subscribe("buildNewLathe", () => {
         if(this.lathe){
-
             destroyOnUpdateMesh(this.scene,this.lathe.mesh);
             gui.remove(this.lathe.latheVisible);
             gui.remove(this.lathe.latheOpacity);
-            
-
         }
         this.lathe = buildLathe(this.scene, 50, gui,eventBus)
-
     })
+
     eventBus.subscribe("buildNewSpiral", () => {
         if(this.spiral){
             destroyOnUpdateMesh(this.scene,this.spiral.line);
             gui.remove(this.spiral.spiralVisible);
-
         }
         this.spiral = buildSpiral(this.scene,this.lathe,gui)
-
     })
 
     this.update = function() {
@@ -172,8 +165,8 @@ function SceneManager(canvas) {
 
         if(this.grid){
             this.grid.update(this.scene)
-    
         }
+
         renderer.render(this.scene, this.camera);
     }
 
