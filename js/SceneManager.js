@@ -5,14 +5,9 @@ function SceneManager(canvas) {
         width: canvas.width,
         height: canvas.height
     }
-    const gui = new dat.GUI();
-    const curveResGUI = gui.add(eventBus.state,'curveResolution',1,200).name('curve resolution');
-    curveResGUI.onChange(()=>eventBus.post('buildNewSpiral'))
-    const spiralResGUI = gui.add(eventBus.state,'spiralResolution',100,3000).name('spiral resolution');
-    spiralResGUI.onChange(() => eventBus.post('buildNewSpiral'))
-    const spiralSlopeGUI = gui.add(eventBus.state, 'spiralSlope', 0.0001, 0.1).name('spiral density');
-    spiralSlopeGUI.onChange(() => eventBus.post('buildNewSpiral'))
 
+    const [latheGUI, spiralGUI] = makeGUI();
+    
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
@@ -26,8 +21,28 @@ function SceneManager(canvas) {
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     this.gridPointList = makeGridPoints(this.scene, segments);
     
-    this.lathe = buildLathe(this.scene,50, gui,eventBus);
-    this.spiral = buildSpiral(this.scene, this.lathe, gui);
+    this.lathe = buildLathe(this.scene,50);
+    this.spiral = buildSpiral(this.scene, this.lathe);
+
+    spiralGUI.add(eventBus.state,'curveResolution',1,200)
+             .name('curve resolution')
+             .onChange(()=>eventBus.post('buildNewSpiral'));
+    spiralGUI.add(eventBus.state,'spiralResolution',100,3000)
+             .name('spiral resolution')
+             .onChange(() => eventBus.post('buildNewSpiral'));
+    spiralGUI.add(eventBus.state, 'spiralSlope', 0.0001, 0.1)
+             .name('spiral density')
+             .onChange(() => eventBus.post('buildNewSpiral'))
+
+    function makeGUI () {
+        const gui = new dat.GUI();
+        const latheGUI = gui.addFolder('Lathe Controls');
+        const spiralGUI = gui.addFolder('Spiral Controls');
+        latheGUI.open();
+        spiralGUI.open();
+
+        return [latheGUI, spiralGUI];
+    }
 
     function makeGridPoints (scene, numberSegments) {
         const gridPointList = [];
@@ -93,11 +108,11 @@ function SceneManager(canvas) {
     }
 
     function buildLathe(scene, resolution){
-        lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
+        lathe = new Lathe(scene, this.anchorPointList, resolution, latheGUI,eventBus);
         return lathe;
     }
     function buildSpiral(scene,lathe, visible){
-        spiral = new SpiralCurve(scene, lathe.curve,gui);
+        spiral = new SpiralCurve(scene, lathe.curve,spiralGUI);
         return spiral;
     }
 
@@ -145,18 +160,18 @@ function SceneManager(canvas) {
     eventBus.subscribe("buildNewLathe", () => {
         if(this.lathe){
             destroyOnUpdateMesh(this.scene,this.lathe.mesh);
-            gui.remove(this.lathe.latheVisible);
-            gui.remove(this.lathe.latheOpacity);
+            latheGUI.remove(this.lathe.latheVisible);
+            latheGUI.remove(this.lathe.latheOpacity);
         }
-        this.lathe = buildLathe(this.scene, 50, gui,eventBus)
+        this.lathe = buildLathe(this.scene, 50)
     })
 
     eventBus.subscribe("buildNewSpiral", () => {
         if(this.spiral){
             destroyOnUpdateMesh(this.scene,this.spiral.line);
-            gui.remove(this.spiral.spiralVisible);
+            spiralGUI.remove(this.spiral.spiralVisible);
         }
-        this.spiral = buildSpiral(this.scene,this.lathe,gui)
+        this.spiral = buildSpiral(this.scene,this.lathe)
     })
 
     this.update = function() {
