@@ -22,10 +22,7 @@ function anchorPointBounds(anchorPoint) {
 	return a;
 }
 
-function convertRange(oldVal,oldMin,oldMax,newMin,newMax){
-	return (((oldVal - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
 
-}
 function bindEventListeners() {
 	window.onresize = resizeCanvas;
 	window.addEventListener( 'mousedown', onMouseClick, false );
