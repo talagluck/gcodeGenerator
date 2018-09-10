@@ -36,7 +36,7 @@ function bindEventListeners() {
 	resizeCanvas();
 }
 
-function onMouseClick(event) {
+function onMouseClick( event ) {
 	event.preventDefault();
 
 	const elapsedTime = clock.getElapsedTime();
@@ -49,8 +49,6 @@ function onMouseClick(event) {
 	vector.unproject(sceneManager.camera);
 
 	sceneManager.raycaster.set(sceneManager.camera.position, vector.sub(sceneManager.camera.position).normalize());
-	// sceneManager.raycaster.setFromCamera(sceneManager.mouse, sceneManager.camera);
-
 
 	// calculate objects intersecting the picking ray
 	let anchorPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
@@ -62,14 +60,11 @@ function onMouseClick(event) {
 		sceneManager.offset = planeIntersects[0].point.sub(sceneManager.plane.mesh.position);
 	}
 	//grid point intersection
-	
 	this.gridPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.gridPointList.map(obj => obj.meshAttr()));
 	if (gridPointIntersects.length > 0) {
-		// debugger;
-		// eventBus.post("updatePlaneColor", gridPointIntersects[0].point.y);
 
-//whichever grid point was selected, convert that to an anchor point, 
-//then repop and sort anchor point list, then remove from grid point list
+	//whichever grid point was selected, convert that to an anchor point, 
+	//then repop and sort anchor point list, then remove from grid point list
 		eventBus.post("addAnchorPoint");
 		eventBus.post("updateLightColor", mouseY);
 		eventBus.post("buildNewLathe")
@@ -78,7 +73,7 @@ function onMouseClick(event) {
 	}
 }
 
-function onMouseMove ( event ){
+function onMouseMove ( event ) {
 	event.preventDefault();
 
 	const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -90,7 +85,6 @@ function onMouseMove ( event ){
 	const currentAnchorPtMesh = sceneManager.selection;
 
 	sceneManager.raycaster.set(sceneManager.camera.position, vector.sub(sceneManager.camera.position).normalize());
-	// eventBus.post("updateLatheColor", mouseX);
 
 	if (currentAnchorPtMesh){
 		const intersects = sceneManager.raycaster.intersectObjects([sceneManager.plane.mesh]);
@@ -118,21 +112,14 @@ function onMouseMove ( event ){
 			{let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2)
 			gridPointsToHide.push(gridAnchorNear[0])}
 		)	
-		// debugger;		
-		// let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - currentAnchorPtMesh.position.y)<2);
 		if(gridPointsToHide.length>=1){
-			// debugger;
 			gridPointsToHide.map(obj=> { if(obj) { obj.hideGridPoint() } } )
 		}
 
 		let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
-		// let hiddenGridPoints = sceneManager.gridPointList.filter(obj => obj.meshAttr().visible === false);
 		gridPointsToShow.map(obj => obj.showGridPoint());
 		eventBus.post("buildNewLathe");
 		eventBus.post("buildNewSpiral");
-
-
-
 	} else {
 		const intersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
 		if(intersects.length > 0){
@@ -141,14 +128,12 @@ function onMouseMove ( event ){
 	}
 }
 
-function onMouseUp( event ){
+function onMouseUp( event ) {
 	sceneManager.selection = null;
 	sceneManager.controls.enabled = true;
-
-
 }
 
-function onMouseRight( event ){
+function onMouseRight( event ) {
 	const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
 	const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -162,7 +147,7 @@ function onMouseRight( event ){
 	if (currentAnchorPtMesh) {
 		this.anchorPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
 		
-		if (anchorPointIntersects.length > 0 && sceneManager.anchorPointList.length>2 ) {
+		if ( anchorPointIntersects.length > 0 && sceneManager.anchorPointList.length>2 ) {
 			sceneManager.selection.position.copy(anchorPointIntersects[0].point.sub(sceneManager.offset));
 			eventBus.post("deleteAnchorPoint", mouseX,sceneManager.anchorPointList);
 			eventBus.post("buildNewLathe");
