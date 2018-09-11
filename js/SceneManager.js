@@ -6,8 +6,6 @@ function SceneManager(canvas) {
         height: canvas.height
     }
 
-    
-
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
@@ -16,23 +14,28 @@ function SceneManager(canvas) {
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
     this.offset = new THREE.Vector3();
+    const gui = makeGUI()
 
     this.anchorPointList = createFirstAnchors(this.scene);
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     this.gridPointList = makeGridPoints(this.scene, segments);
     
-    const [latheGUI, spiralGUI] = makeGUI();
 
     this.lathe = buildLathe(this.scene,50);
     this.spiral = buildSpiral(this.scene, this.lathe);
 
-    
+    function getAnchorPointsPlacement() {
+        return this.anchorPointList.map(
+            anchorPoint => anchorPoint.mesh.position
+        )
+    }
 
     function makeGUI () {
         const gui = new dat.GUI();
         gui.remember(eventBus.state);
         const latheGUI = gui.addFolder('Lathe Controls');
         const spiralGUI = gui.addFolder('Spiral Controls');
+        const anchorGUI = gui.addFolder('Anchor Points');
         latheGUI.open();
         spiralGUI.open();
         
@@ -44,9 +47,17 @@ function SceneManager(canvas) {
                 .onChange(() => eventBus.post('buildNewSpiral'));
         spiralGUI.add(eventBus.state, 'spiralSlope', 0.0001, 0.1)
                 .name('spiral density')
-                .onChange(() => eventBus.post('buildNewSpiral'))
+                .onChange(() => eventBus.post('buildNewSpiral'));
 
-        return [latheGUI, spiralGUI];
+        const guiDict = {
+            root: gui,
+            lathe: latheGUI,
+            spiral: spiralGUI,
+            anchor: anchorGUI
+        }
+
+        // return [anchorGUI, latheGUI, spiralGUI];
+        return guiDict
     }
 
     function makeGridPoints (scene, numberSegments) {
@@ -70,12 +81,34 @@ function SceneManager(canvas) {
         return gridPointList;
     }
 
-    function createFirstAnchors(scene) {
+    function buildAnchorPoint(scene, x, y, z) {
+        let anchorPoint = new AnchorPoint(scene, gui.anchor, x, y, z);
+        gui.root.remember(anchorPoint.mesh.position);
+        anchorPoint.posX = gui.anchor.add(anchorPoint.mesh.position, 'x', 0, 50)
+                            .listen()
+                            .onChange((val) => { 
+                                // debugger
+                                anchorPoint.mesh.position.setX(val);
+                                eventBus.post("buildNewLathe");
+                                eventBus.post("buildNewSpiral");
+                            });
+        anchorPoint.posY = gui.anchor.add(anchorPoint.mesh.position, 'y', -50, 50)
+                            .listen()
+                            .onChange((val) => {
+                                anchorPoint.mesh.position.setY(val);
+                                eventBus.post("buildNewLathe");
+                                eventBus.post("buildNewSpiral");
+                            }); 
+
+        return anchorPoint
+    }
+
+    function createFirstAnchors(scene, 
+                                startingDims=[[10, 10, 0], [10, -10, 0]]) {
         anchorPointList = [];
-        let startingDims = [[10, 10], [10, -10]];
         startingDims.forEach(
             (dims) => {
-                anchorPt = new AnchorPoint(scene, ...dims);
+                let anchorPt = buildAnchorPoint(scene, ...dims)
                 anchorPointList.push(anchorPt);
             }
         )
@@ -113,11 +146,11 @@ function SceneManager(canvas) {
     }
 
     function buildLathe(scene, resolution){
-        lathe = new Lathe(scene, this.anchorPointList, resolution, latheGUI,eventBus);
+        lathe = new Lathe(scene, this.anchorPointList, resolution, gui.lathe,eventBus);
         return lathe;
     }
     function buildSpiral(scene,lathe, visible){
-        spiral = new SpiralCurve(scene, lathe.curve,spiralGUI);
+        spiral = new SpiralCurve(scene, lathe.curve,gui.spiral);
         return spiral;
     }
 
@@ -137,14 +170,14 @@ function SceneManager(canvas) {
         return lights
     }
 
-    eventBus.subscribe("addAnchorPoint", () => {
+    eventBus.subscribe("updateAnchorPoints", getAnchorPointsPlacement);
+    
+    eventBus.subscribe("addAnchorPoint", ([newAnchorPtX, newAnchorPtY]) => {
         //currently uuids redraw each time. need to maintain a consistent list for matching purposes. then filter and remove
         //from the grid point list.
-        let gridPointIntersect = this.gridPointList.filter(obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
-        gridPointIntersect.hideGridPoint();
-        let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
-        let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
-        let newAnchorPt = new AnchorPoint(this.scene, newAnchorPtX, newAnchorPtY);
+
+        let newAnchorPt = buildAnchorPoint(this.scene, newAnchorPtX, newAnchorPtY, 0);
+        // let newAnchorPt = new AnchorPoint(this.scene, anchorGUI, newAnchorPtX, newAnchorPtY, 0);
         this.anchorPointList.push(newAnchorPt);
         this.anchorPointList.sort(function (a, b) {
             return b.mesh.position.y - a.mesh.position.y
@@ -155,8 +188,11 @@ function SceneManager(canvas) {
         this.anchorPointList.forEach(
             (pt) => {
                 if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid) {
+                    gui.anchor.remove(pt.posX);
+                    gui.anchor.remove(pt.posY);
                     this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
                     destroyOnUpdateMesh(this.scene, pt.mesh);
+
                 }
             }
         )
@@ -165,8 +201,8 @@ function SceneManager(canvas) {
     eventBus.subscribe("buildNewLathe", () => {
         if(this.lathe){
             destroyOnUpdateMesh(this.scene,this.lathe.mesh);
-            latheGUI.remove(this.lathe.latheVisible);
-            latheGUI.remove(this.lathe.latheOpacity);
+            gui.lathe.remove(this.lathe.latheVisible);
+            gui.lathe.remove(this.lathe.latheOpacity);
         }
         this.lathe = buildLathe(this.scene, 50)
     })
@@ -174,7 +210,7 @@ function SceneManager(canvas) {
     eventBus.subscribe("buildNewSpiral", () => {
         if(this.spiral){
             destroyOnUpdateMesh(this.scene,this.spiral.line);
-            spiralGUI.remove(this.spiral.spiralVisible);
+            gui.spiral.remove(this.spiral.spiralVisible);
         }
         this.spiral = buildSpiral(this.scene,this.lathe)
     })

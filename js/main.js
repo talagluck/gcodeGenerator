@@ -49,12 +49,17 @@ function onMouseClick( event ) {
 	}
 
 	//grid point intersection
-	this.gridPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.gridPointList.map(obj => obj.meshAttr()));
+	let gridPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.gridPointList.map(obj => obj.meshAttr()));
 	if (gridPointIntersects.length > 0) {
-
+		let gridPointIntersect = sceneManager.gridPointList.filter(
+			obj => obj.meshAttr().uuid === gridPointIntersects[0].object.uuid)[0];
+        gridPointIntersect.hideGridPoint();
+        let newAnchorPtX = gridPointIntersect.meshAttr().position.x;
+        let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
 	//whichever grid point was selected, convert that to an anchor point, 
 	//then repop and sort anchor point list, then remove from grid point list
-		eventBus.post("addAnchorPoint");
+		
+		eventBus.post("addAnchorPoint", [newAnchorPtX, newAnchorPtY]);
 		eventBus.post("updateLightColor", mouseY);
 		eventBus.post("buildNewLathe")
 		eventBus.post("buildNewSpiral")
