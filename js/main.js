@@ -84,29 +84,29 @@ function onMouseMove ( event ) {
 		sceneManager.selection.position.copy(intersects[0].point.sub(sceneManager.offset));
 
 		const i = sceneManager.anchorPointList.map(obj => obj.mesh.uuid).indexOf(currentAnchorPtMesh.uuid);
-		const currentAnchorPoint = sceneManager.anchorPointList[i].mesh;
-		const top = i == 0 ? maxY : sceneManager.anchorPointList[i - 1].mesh.position.y;
-		const bottom = i == sceneManager.anchorPointList.length - 1 ? minY : sceneManager.anchorPointList[i + 1].mesh.position.y;
-
-		if (currentAnchorPoint.position.x < minX) { currentAnchorPoint.position.x = minX; }
-		if (currentAnchorPoint.position.x > maxX) { currentAnchorPoint.position.x = maxX; }
-		if (currentAnchorPoint.position.y >= top - 1) { currentAnchorPoint.position.y = top - 1; }
-		if (currentAnchorPoint.position.y <= bottom + 1) { currentAnchorPoint.position.y = bottom + 1; }
-
-		const gridPointsToHide = []
-		anchorPointList.forEach(anc => {
-			let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2);
-			if (gridAnchorNear[0]) { 
-				gridAnchorNear[0].hideGridPoint();
-				gridPointsToHide.push(gridAnchorNear[0]);	
-			};
-		})	
-
-		let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
-		gridPointsToShow.map(obj => obj.showGridPoint());
-		eventBus.post("buildNewLathe");
-		eventBus.post("buildNewSpiral");
-		
+		if ( i >= 0 ) {
+			const top = i == 0 ? maxY : sceneManager.anchorPointList[i - 1].mesh.position.y;
+			const bottom = i == sceneManager.anchorPointList.length - 1 ? minY : sceneManager.anchorPointList[i + 1].mesh.position.y;
+	
+			if (currentAnchorPtMesh.position.x < minX) { currentAnchorPtMesh.position.x = minX; }
+			if (currentAnchorPtMesh.position.x > maxX) { currentAnchorPtMesh.position.x = maxX; }
+			if (currentAnchorPtMesh.position.y >= top - 1) { currentAnchorPtMesh.position.y = top - 1; }
+			if (currentAnchorPtMesh.position.y <= bottom + 1) { currentAnchorPtMesh.position.y = bottom + 1; }
+	
+			const gridPointsToHide = []
+			anchorPointList.forEach(anc => {
+				let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2);
+				if (gridAnchorNear[0]) { 
+					gridAnchorNear[0].hideGridPoint();
+					gridPointsToHide.push(gridAnchorNear[0]);	
+				};
+			})	
+	
+			let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
+			gridPointsToShow.map(obj => obj.showGridPoint());
+			eventBus.post("buildNewLathe");
+			eventBus.post("buildNewSpiral");
+		}
 	} else {
 		const intersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
 		if(intersects.length > 0){
@@ -135,10 +135,21 @@ function onMouseRight( event ) {
 		this.anchorPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
 		
 		if ( anchorPointIntersects.length > 0 && sceneManager.anchorPointList.length>2 ) {
-			sceneManager.selection.position.copy(anchorPointIntersects[0].point.sub(sceneManager.offset));
+			// To Discuss: line below offsets position unreliably, maybe this is related to
+			// weird snapping behavior on mouse drag sometimes?
+			// console.log(`before: ${currentAnchorPtMesh.position.y}`)
+			// sceneManager.selection.position.copy(anchorPointIntersects[0].point.sub(sceneManager.offset));
+			// console.log(`after: ${currentAnchorPtMesh.position.y}`)
 			eventBus.post("deleteAnchorPoint", mouseX,sceneManager.anchorPointList);
 			eventBus.post("buildNewLathe");
 			eventBus.post("buildNewSpiral");
+
+			// debugger
+			let gridPointToShow = sceneManager.gridPointList.filter( 
+				obj => obj.meshAttr().visible === false && 
+					   Math.abs(obj.meshAttr().position.y - currentAnchorPtMesh.position.y) <= 2
+			)[0]
+			if( gridPointToShow ) { gridPointToShow.showGridPoint() }
 		}
 	}
 }
