@@ -14,9 +14,9 @@ function SceneManager(canvas) {
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
     this.offset = new THREE.Vector3();
-    const gui = makeGUI()
-
-    this.anchorPointList = createFirstAnchors(this.scene);
+    const gui = makeGUI();
+    this.gui = gui;
+    this.anchorPointList = createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     this.gridPointList = makeGridPoints(this.scene, segments);
     
@@ -24,14 +24,30 @@ function SceneManager(canvas) {
     this.lathe = buildLathe(this.scene,50);
     this.spiral = buildSpiral(this.scene, this.lathe);
 
+    this.redraw = () => {
+        eventBus.post("deleteAllAnchorPoints")
+        eventBus.state = Object.assign({},eventBus.prevState[eventBus.prevState.length - 1]);
+        this.anchorPointList = createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);  
+        eventBus.post("buildNewLathe");
+        eventBus.post("buildNewSpiral");
+        eventBus.post("showHideGridPoints");
+        
+        // this.gridPointList = makeGridPoints(this.scene, segments);
+
+    }
+
+    gui.root.add(this, 'redraw');
+    gui.root.add(eventBus, 'save');
+
     function getAnchorPointsPlacement() {
-        return this.anchorPointList.map(
-            anchorPoint => anchorPoint.mesh.position
+        eventBus.state.anchorPointsPosition = this.anchorPointList.map(
+            anchorPoint => [anchorPoint.mesh.position.x, anchorPoint.mesh.position.y,0]
         )
     }
 
     function makeGUI () {
         const gui = new dat.GUI();
+
         gui.remember(eventBus.state);
         const latheGUI = gui.addFolder('Lathe Controls');
         const spiralGUI = gui.addFolder('Spiral Controls');
@@ -103,8 +119,7 @@ function SceneManager(canvas) {
         return anchorPoint
     }
 
-    function createFirstAnchors(scene, 
-                                startingDims=[[10, 10, 0], [10, -10, 0]]) {
+    function createFirstAnchors(scene, startingDims) {
         anchorPointList = [];
         startingDims.forEach(
             (dims) => {
@@ -112,6 +127,7 @@ function SceneManager(canvas) {
                 anchorPointList.push(anchorPt);
             }
         )
+
         return anchorPointList;
     }
 
@@ -192,11 +208,24 @@ function SceneManager(canvas) {
                     gui.anchor.remove(pt.posY);
                     this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
                     destroyOnUpdateMesh(this.scene, pt.mesh);
-
                 }
             }
         )
     }, this)
+
+
+    eventBus.subscribe("deleteAllAnchorPoints", () => {
+        this.anchorPointList.forEach(
+            (pt) => {            
+                    gui.anchor.remove(pt.posX);
+                    gui.anchor.remove(pt.posY);
+                    destroyOnUpdateMesh(this.scene, pt.mesh);           
+            }        
+        ) 
+        this.anchorPointList = []
+    }, this)
+
+
 
     eventBus.subscribe("buildNewLathe", () => {
         if(this.lathe){
@@ -215,6 +244,19 @@ function SceneManager(canvas) {
         this.spiral = buildSpiral(this.scene,this.lathe)
     })
 
+    eventBus.subscribe("showHideGridPoints",() => {
+        const gridPointsToHide = []
+        anchorPointList.forEach(anc => {
+            let gridAnchorNear = this.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2);
+            if (gridAnchorNear[0]) {
+                gridAnchorNear[0].hideGridPoint();
+                gridPointsToHide.push(gridAnchorNear[0]);
+            };
+        })
+        let gridPointsToShow = this.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
+        gridPointsToShow.map(obj => obj.showGridPoint());
+    }
+)
     this.update = function() {
         this.controls.update();
         renderer.clear();

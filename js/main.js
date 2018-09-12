@@ -45,7 +45,9 @@ function onMouseClick( event ) {
 		sceneManager.selection = anchorPointIntersects[0].object;
 
 		let planeIntersects = sceneManager.raycaster.intersectObject(sceneManager.plane.mesh);
-		sceneManager.offset = planeIntersects[0].point.sub(sceneManager.plane.mesh.position);
+		
+		sceneManager.offset.copy(planeIntersects[0].point.sub(sceneManager.plane.mesh.position));
+		// sceneManager.offset = planeIntersects[0].point.sub(sceneManager.plane.mesh.position);
 	}
 
 	//grid point intersection
@@ -63,6 +65,8 @@ function onMouseClick( event ) {
 		eventBus.post("updateLightColor", mouseY);
 		eventBus.post("buildNewLathe")
 		eventBus.post("buildNewSpiral")
+		eventBus.post("updateAnchorPoints");
+
 
 	}
 }
@@ -86,7 +90,9 @@ function onMouseMove ( event ) {
 
 	if (currentAnchorPtMesh){
 		const intersects = sceneManager.raycaster.intersectObjects([sceneManager.plane.mesh]);
+		console.log(`before: ${currentAnchorPtMesh.position.y}`)
 		sceneManager.selection.position.copy(intersects[0].point.sub(sceneManager.offset));
+		console.log(`after: ${currentAnchorPtMesh.position.y}`)
 
 		const i = sceneManager.anchorPointList.map(obj => obj.mesh.uuid).indexOf(currentAnchorPtMesh.uuid);
 		if ( i >= 0 ) {
@@ -98,19 +104,21 @@ function onMouseMove ( event ) {
 			if (currentAnchorPtMesh.position.y >= top - 1) { currentAnchorPtMesh.position.y = top - 1; }
 			if (currentAnchorPtMesh.position.y <= bottom + 1) { currentAnchorPtMesh.position.y = bottom + 1; }
 	
-			const gridPointsToHide = []
-			anchorPointList.forEach(anc => {
-				let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2);
-				if (gridAnchorNear[0]) { 
-					gridAnchorNear[0].hideGridPoint();
-					gridPointsToHide.push(gridAnchorNear[0]);	
-				};
-			})	
+			// const gridPointsToHide = []
+			// anchorPointList.forEach(anc => {
+			// 	let gridAnchorNear = sceneManager.gridPointList.filter(obj => Math.abs(obj.meshAttr().position.y - anc.mesh.position.y) < 2);
+			// 	if (gridAnchorNear[0]) { 
+			// 		gridAnchorNear[0].hideGridPoint();
+			// 		gridPointsToHide.push(gridAnchorNear[0]);	
+			// 	};
+			// })	
 	
-			let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
-			gridPointsToShow.map(obj => obj.showGridPoint());
+			// let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
+			// gridPointsToShow.map(obj => obj.showGridPoint());
+			eventBus.post("showHideGridPoints");
 			eventBus.post("buildNewLathe");
 			eventBus.post("buildNewSpiral");
+			eventBus.post("updateAnchorPoints");
 		}
 	} else {
 		const intersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
@@ -148,6 +156,8 @@ function onMouseRight( event ) {
 			eventBus.post("deleteAnchorPoint", mouseX,sceneManager.anchorPointList);
 			eventBus.post("buildNewLathe");
 			eventBus.post("buildNewSpiral");
+			eventBus.post("updateAnchorPoints");
+
 
 			// debugger
 			let gridPointToShow = sceneManager.gridPointList.filter( 

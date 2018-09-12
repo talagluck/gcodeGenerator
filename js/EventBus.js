@@ -5,8 +5,16 @@ function EventBus() {
         latheOpacity: 0.7,
         curveResolution: 1000,
         spiralResolution: 2000,   
-        spiralSlope: 0.2
+        spiralSlope: 0.2,
+        anchorPointsPosition:[[10, 10, 0], [10, -10, 0]]
+        // prevState: {}
     }
+    this.prevState = []
+
+    this.save = function () {
+        this.prevState.push(Object.assign({},this.state));
+    }
+    
     this.eventCallbacksPairsList = [];
 
     this.subscribe = function (eventType, callback) {
