@@ -130,6 +130,7 @@ function onMouseMove ( event ){
 		gridPointsToShow.map(obj => obj.showGridPoint());
 		eventBus.post("buildNewLathe");
 		eventBus.post("buildNewSpiral");
+		eventBus.post("buildNewBottomSpiral");
 
 
 

@@ -30,6 +30,7 @@ function SceneManager(canvas) {
     
     this.lathe = buildLathe(this.scene,50, gui,eventBus);
     this.spiral = buildSpiral(this.scene, this.lathe, gui);
+    this.bottomSpiral = buildBottomSpiral(this.scene,this.anchorPointList,gui);
 
     function makeGridPoints (scene, numberSegments) {
         const gridPointList = [];
@@ -112,6 +113,15 @@ function SceneManager(canvas) {
         this.spiral = buildSpiral(this.scene,this.lathe,gui)
 
     })
+    eventBus.subscribe("buildNewBottomSpiral", () => {
+        if(this.bottomSpiral){
+            destroyOnUpdateMesh(this.scene,this.bottomSpiral.line);
+            // gui.remove(this.spiral.spiralVisible);
+
+        }
+        this.bottomSpiral = buildBottomSpiral(this.scene,this.anchorPointList,gui)
+
+    })
 
 
 
@@ -176,13 +186,18 @@ function SceneManager(canvas) {
 
     function buildLathe(scene, resolution){
         // debugger;
-        lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
+        let lathe = new Lathe(scene, this.anchorPointList, resolution, gui,eventBus);
         return lathe;
     }
-    function buildSpiral(scene,lathe, visible){
+    function buildSpiral(scene,lathe){
         // debugger;
-        spiral = new SpiralCurve(scene, lathe.curve,gui);
+        let spiral = new SpiralCurve(scene, lathe.curve,gui);
         return spiral;
+    }
+
+    function buildBottomSpiral(scene, anchorPointList, gui){
+        let bottomSpiral = new BottomSpiral(scene, this.anchorPointList, gui);
+        return bottomSpiral;
     }
 
 

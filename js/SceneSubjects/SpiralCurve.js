@@ -28,30 +28,6 @@ function SpiralCurve(scene, curve, gui) {
     }
 
 
-    // for(let Y=revolutions-1;Y>-1;Y--){
-    // for(let Y=0;Y<revolutions;Y++){
-    //     let curY = points[Y].y;
-    //     let deltaY = (curY-bottomY)/resolution;
-    //     let curRadius = points[Y].x;
-
-    //     let deltaT = deltaY/slope;
-
-    //     // for(let tk=resolution-1;tk>-1;tk--){
-    //     for(let tk=0;tk<resolution;tk++){
-    //         let t=tk*deltaT;
-
-    //         let x = curRadius*Math.cos(t);
-    //         let y = t;
-    //         let z = curRadius*Math.sin(t);
-
-    //         let newPt = new THREE.Vector3(x, y, z);
-
-    //         spiralPoints.push(newPt);
-    //     }
-    // }
-    // for (let k = resolution; k > -1; k--) {
-    // var pt = {};
-    // for (let k = 0; k < 5; k++) {
     for (let k = 0; k < spiralResolution+1; k++) {
         
         // let curY = points[k].y;
