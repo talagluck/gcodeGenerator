@@ -1,4 +1,4 @@
-function AnchorPoint(scene, gui, x, y, z) {
+function AnchorPoint(scene, x, y, z) {
     // const radius = 2;
     const numberSegments = 20;
     const geometry = new THREE.SphereGeometry(

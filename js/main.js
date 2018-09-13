@@ -17,10 +17,10 @@ function anchorPointBounds(anchorPoint) {
 
 function bindEventListeners() {
 	window.onresize = resizeCanvas;
-	window.addEventListener( 'mousedown', onMouseClick, false );
-	window.addEventListener( 'mouseup', onMouseUp, true );
-	window.addEventListener( 'mousemove', onMouseMove, false );
-	window.addEventListener( 'contextmenu', onMouseRight , false );
+	canvas.addEventListener( 'mousedown', onMouseClick, false );
+	canvas.addEventListener( 'mouseup', onMouseUp, true );
+	canvas.addEventListener( 'mousemove', onMouseMove, false );
+	canvas.addEventListener( 'contextmenu', onMouseRight , false );
 
 	resizeCanvas();
 }
@@ -145,7 +145,7 @@ function onMouseRight( event ) {
 	sceneManager.raycaster.set(sceneManager.camera.position, vector.sub(sceneManager.camera.position).normalize());
 
 	if (currentAnchorPtMesh) {
-		this.anchorPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
+		anchorPointIntersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
 		
 		if ( anchorPointIntersects.length > 0 && sceneManager.anchorPointList.length>2 ) {
 			// To Discuss: line below offsets position unreliably, maybe this is related to

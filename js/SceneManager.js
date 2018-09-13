@@ -24,9 +24,16 @@ function SceneManager(canvas) {
     this.lathe = buildLathe(this.scene,50);
     this.spiral = buildSpiral(this.scene, this.lathe);
 
+    this.redrawOptions = ''
     this.redraw = () => {
+        let option = this.gui.root.__controllers[1].__select.selectedOptions[0].value;
+        let selectedState = eventBus.prevState.filter(
+            (obj)=>obj.timestamp == option
+        )[0]
+
+
         eventBus.post("deleteAllAnchorPoints")
-        eventBus.state = Object.assign({},eventBus.prevState[eventBus.prevState.length - 1]);
+        eventBus.state = Object.assign({},selectedState);
         this.anchorPointList = createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);  
         eventBus.post("buildNewLathe");
         eventBus.post("buildNewSpiral");
@@ -35,10 +42,8 @@ function SceneManager(canvas) {
         // this.gridPointList = makeGridPoints(this.scene, segments);
 
     }
-
-    gui.root.add(this, 'redraw');
-    gui.root.add(eventBus, 'save');
-
+    gui.root.add(eventBus, 'save').onChange();
+    
     function getAnchorPointsPlacement() {
         eventBus.state.anchorPointsPosition = this.anchorPointList.map(
             anchorPoint => [anchorPoint.mesh.position.x, anchorPoint.mesh.position.y,0]
@@ -48,10 +53,10 @@ function SceneManager(canvas) {
     function makeGUI () {
         const gui = new dat.GUI();
 
-        gui.remember(eventBus.state);
+        // gui.remember(eventBus.state);
         const latheGUI = gui.addFolder('Lathe Controls');
         const spiralGUI = gui.addFolder('Spiral Controls');
-        const anchorGUI = gui.addFolder('Anchor Points');
+        // const anchorGUI = gui.addFolder('Anchor Points');
         latheGUI.open();
         spiralGUI.open();
         
@@ -69,7 +74,7 @@ function SceneManager(canvas) {
             root: gui,
             lathe: latheGUI,
             spiral: spiralGUI,
-            anchor: anchorGUI
+            // anchor: anchorGUI
         }
 
         // return [anchorGUI, latheGUI, spiralGUI];
@@ -98,23 +103,23 @@ function SceneManager(canvas) {
     }
 
     function buildAnchorPoint(scene, x, y, z) {
-        let anchorPoint = new AnchorPoint(scene, gui.anchor, x, y, z);
-        gui.root.remember(anchorPoint.mesh.position);
-        anchorPoint.posX = gui.anchor.add(anchorPoint.mesh.position, 'x', 0, 50)
-                            .listen()
-                            .onChange((val) => { 
-                                // debugger
-                                anchorPoint.mesh.position.setX(val);
-                                eventBus.post("buildNewLathe");
-                                eventBus.post("buildNewSpiral");
-                            });
-        anchorPoint.posY = gui.anchor.add(anchorPoint.mesh.position, 'y', -50, 50)
-                            .listen()
-                            .onChange((val) => {
-                                anchorPoint.mesh.position.setY(val);
-                                eventBus.post("buildNewLathe");
-                                eventBus.post("buildNewSpiral");
-                            }); 
+        let anchorPoint = new AnchorPoint(scene, x, y, z);
+        // gui.root.remember(anchorPoint.mesh.position);
+        // anchorPoint.posX = gui.anchor.add(anchorPoint.mesh.position, 'x', 0, 50)
+        //                     .listen()
+        //                     .onChange((val) => { 
+        //                         // debugger
+        //                         anchorPoint.mesh.position.setX(val);
+        //                         eventBus.post("buildNewLathe");
+        //                         eventBus.post("buildNewSpiral");
+        //                     });
+        // anchorPoint.posY = gui.anchor.add(anchorPoint.mesh.position, 'y', -50, 50)
+        //                     .listen()
+        //                     .onChange((val) => {
+        //                         anchorPoint.mesh.position.setY(val);
+        //                         eventBus.post("buildNewLathe");
+        //                         eventBus.post("buildNewSpiral");
+        //                     }); 
 
         return anchorPoint
     }
@@ -204,8 +209,8 @@ function SceneManager(canvas) {
         this.anchorPointList.forEach(
             (pt) => {
                 if (pt.mesh.uuid == anchorPointIntersects[0].object.uuid) {
-                    gui.anchor.remove(pt.posX);
-                    gui.anchor.remove(pt.posY);
+                    // gui.anchor.remove(pt.posX);
+                    // gui.anchor.remove(pt.posY);
                     this.anchorPointList.splice(this.anchorPointList.indexOf(pt), 1);
                     destroyOnUpdateMesh(this.scene, pt.mesh);
                 }
@@ -217,8 +222,8 @@ function SceneManager(canvas) {
     eventBus.subscribe("deleteAllAnchorPoints", () => {
         this.anchorPointList.forEach(
             (pt) => {            
-                    gui.anchor.remove(pt.posX);
-                    gui.anchor.remove(pt.posY);
+                    // gui.anchor.remove(pt.posX);
+                    // gui.anchor.remove(pt.posY);
                     destroyOnUpdateMesh(this.scene, pt.mesh);           
             }        
         ) 

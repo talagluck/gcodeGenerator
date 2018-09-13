@@ -12,7 +12,19 @@ function EventBus() {
     this.prevState = []
 
     this.save = function () {
-        this.prevState.push(Object.assign({},this.state));
+        let newPrevState = Object.assign({ timestamp: Date.now() }, this.state)
+        this.prevState.push(newPrevState);
+        let redrawOptionsController = sceneManager.gui.root.__controllers.filter(controller => controller.property == "redrawOptions")[0];
+        let redrawController = sceneManager.gui.root.__controllers.filter(controller => controller.property == "redraw")[0];
+        if (redrawOptionsController){
+            redrawOptionsController.remove();
+            redrawController.remove();
+        }
+        this.prevState=this.prevState.reverse();
+       sceneManager.gui.root.add(sceneManager, 'redrawOptions', this.prevState.map(pr => pr.timestamp) ).onChange(console.log('changed'));
+       sceneManager.gui.root.add(sceneManager, 'redraw');
+
+        // console.log(this.prevState[this.prevState.length-1])
     }
     
     this.eventCallbacksPairsList = [];
