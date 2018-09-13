@@ -9,26 +9,28 @@ function BottomSpiral(scene, anchorPointList, gui) {
 
 
     this.spiralPoints = []
-    const spStart = 0;
-    const spEnd = bottomPointX * 30;
-    const spacing = spEnd/3;
-    // const spEnd = bottomPoint.mesh.position.x;
 
-    for (let i = spStart; i < spEnd; i++) {
-   
-        let density = .1;
+    const numRevolutions =30; //N
+    const resolution = 360; //k
+    const spEnd = numRevolutions*resolution;
+    const accelerationRate = 1; //increase to decrease density as it goes out
 
-        let a=spacing*Math.PI/2.75;
-        let t= i/(spEnd/spacing);
-        let x=density*t*Math.cos(t+a);
-        let z=density*t*Math.sin(t+a);
-        let y = bottomPointY;
+    const offsetY = 1; //make this bigger to lower the bottom of the bowl
+    const otherPointY = bottomPointY - offsetY;
+
+    for (let t = 0; t <= spEnd; t++) {
+        //this formula needs t to start at 0
+        let radius = bottomPointX * Math.pow(t/spEnd,accelerationRate);
+        // let radius = bottomPointX/spEnd*t
+        let x=radius*Math.cos(2*Math.PI*t/resolution);
+        let z=radius*Math.sin(2*Math.PI*t/resolution);
+        let curvatureGradient = Math.pow(t/spEnd,4); //decrease the 4 to decrease 'roundness'
+        let y = bottomPointY*curvatureGradient + otherPointY*(1 - curvatureGradient);
         let newPt = new THREE.Vector3(x, y, z);
 
         this.spiralPoints.push(newPt);
 
     }
-    // console.log(this.spiralPoints);
     this.catMull = new THREE.CatmullRomCurve3(this.spiralPoints);
     this.catMullPoints = this.catMull.getPoints(100);
     this.lineGeo = new THREE.BufferGeometry().setFromPoints(this.spiralPoints);
@@ -38,7 +40,7 @@ function BottomSpiral(scene, anchorPointList, gui) {
 
     this.line = new THREE.Line(this.lineGeo, lineMat);
 
-    scene.add(this.line);
+    // scene.add(this.line);
 
 
 

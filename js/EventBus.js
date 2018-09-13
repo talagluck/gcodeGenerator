@@ -1,10 +1,10 @@
 function EventBus() {
-    this.state={spiralVisible:false,
-                latheVisible:true,
+    this.state={spiralVisible:true,
+                latheVisible:false,
                 latheOpacity: 0.7,
-                curveResolution: 1000,
-                spiralResolution: 2000,   
-                spiralSlope: 0.2         
+                curveResolution: 2500,
+                spiralResolution: 1000,   
+                spiralSlope: 0.1         
     }
     this.eventCallbacksPairsList = [];
 
