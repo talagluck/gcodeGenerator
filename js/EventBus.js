@@ -4,7 +4,8 @@ function EventBus() {
                 latheOpacity: 0.7,
                 curveResolution: 5000,
                 spiralResolution: 1000,   
-                spiralSlope: 0.1         
+                spiralSlope: 0.1,    
+                slopeXres: 1,      
     }
     this.eventCallbacksPairsList = [];
 
