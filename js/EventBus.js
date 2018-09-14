@@ -1,12 +1,33 @@
 function EventBus() {
-    this.state={spiralVisible:true,
-                latheVisible:false,
-                latheOpacity: 0.7,
-                curveResolution: 5000,
-                spiralResolution: 1000,   
-                spiralSlope: 0.1,    
-                slopeXres: 1,      
+    this.state = {
+        spiralVisible:true,
+        latheVisible:false,
+        latheOpacity: 0.7,
+        curveResolution: 5000,
+        spiralResolution: 1000,   
+        spiralSlope: 0.1,
+        anchorPointsPosition:[[10, 10, 0], [10, -10, 0]],
+        slopeXres: 1,
+        // prevState: {}
     }
+    this.prevState = []
+
+    this.save = function () {
+        let newPrevState = Object.assign({ timestamp: Date.now() }, this.state)
+        this.prevState.push(newPrevState);
+        let redrawOptionsController = sceneManager.gui.root.__controllers.filter(controller => controller.property == "redrawOptions")[0];
+        let redrawController = sceneManager.gui.root.__controllers.filter(controller => controller.property == "redraw")[0];
+        if (redrawOptionsController){
+            redrawOptionsController.remove();
+            redrawController.remove();
+        }
+        this.prevState=this.prevState.reverse();
+       sceneManager.gui.root.add(sceneManager, 'redrawOptions', this.prevState.map(pr => pr.timestamp) ).onChange(console.log('changed'));
+       sceneManager.gui.root.add(sceneManager, 'redraw');
+
+        // console.log(this.prevState[this.prevState.length-1])
+    }
+    
     this.eventCallbacksPairsList = [];
 
     this.subscribe = function (eventType, callback) {

@@ -13,12 +13,15 @@ function GeneralLights(scene,intensity, color, distance,x,y,z) {
 		let color = convertRange(mouseY, oldMin, oldMax, newMin, newMax);
 		light.color.setHSL(color, 0.8, 0.5 );
 	}
+
+	function convertRange(oldVal,oldMin,oldMax,newMin,newMax){
+		return (((oldVal - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
+	
+	}
+
 	eventBus.subscribe("updateLightColor", (mouseY) => {
 		this.changeLightColor(mouseY);
 
 	})
-	this.update = function(time) {
-		// light.intensity = (Math.sin(time)+1.5)/1.5;
-		// light.color.setHSL( Math.sin(time), 0.5, 0.5 );
-	}
+
 }
