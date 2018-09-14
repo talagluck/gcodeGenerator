@@ -2,7 +2,7 @@ function EventBus() {
     this.state={spiralVisible:true,
                 latheVisible:false,
                 latheOpacity: 0.7,
-                curveResolution: 2500,
+                curveResolution: 5000,
                 spiralResolution: 1000,   
                 spiralSlope: 0.1         
     }

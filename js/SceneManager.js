@@ -7,12 +7,13 @@ function SceneManager(canvas) {
         height: canvas.height
     }
     const gui = new dat.GUI();
-    const curveResGUI = gui.add(eventBus.state,'curveResolution',1,200).name('curve resolution');
-    curveResGUI.onChange(()=>eventBus.post('buildNewSpiral'))
+    // const curveResGUI = gui.add(eventBus.state,'curveResolution',1,200).name('curve resolution');
+    // curveResGUI.onChange(()=>eventBus.post('buildNewSpiral'))
     const spiralResGUI = gui.add(eventBus.state,'spiralResolution',100,2500).name('spiral resolution');
     spiralResGUI.onChange(() => eventBus.post('buildNewSpiral'))
     const spiralSlopeGUI = gui.add(eventBus.state, 'spiralSlope', 0.01, .25).name('spiral density');
-    spiralSlopeGUI.onChange(() => eventBus.post('buildNewSpiral'))
+    spiralSlopeGUI.onChange(() => eventBus.post('buildNewSpiral'));
+    spiralSlopeGUI.onChange(()=> spiralResGUI.value = 100);
 
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
