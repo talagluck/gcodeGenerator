@@ -60,12 +60,16 @@ function onMouseClick( event ) {
         let newAnchorPtY = gridPointIntersect.meshAttr().position.y;
 	//whichever grid point was selected, convert that to an anchor point, 
 	//then repop and sort anchor point list, then remove from grid point list
-		
+		eventBus.post("updateAnchorPoints");
+		eventBus.post("heightSpiralChanges");
+		// eventBus.state.totalHeight = eventBus.state.anchorPointsPosition[0][1] - eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length - 1][1]
+		// eventBus.state.spiralSlope = eventBus.state.heightXslope * eventBus.state.totalHeight;
+		// eventBus.state.spiralResolution = eventBus.state.slopeXres/ eventBus.state.spiralSlope;
 		eventBus.post("addAnchorPoint", [newAnchorPtX, newAnchorPtY]);
 		eventBus.post("updateLightColor", mouseY);
 		eventBus.post("buildNewLathe")
-		eventBus.post("buildNewSpiral")
-		eventBus.post("updateAnchorPoints");
+		eventBus.post("buildNewSpiral");
+		eventBus.post("buildNewBottomSpiral");
 
 
 	}
@@ -90,9 +94,9 @@ function onMouseMove ( event ) {
 
 	if (currentAnchorPtMesh){
 		const intersects = sceneManager.raycaster.intersectObjects([sceneManager.plane.mesh]);
-		console.log(`before: ${currentAnchorPtMesh.position.y}`)
+		// console.log(`before: ${currentAnchorPtMesh.position.y}`)
 		sceneManager.selection.position.copy(intersects[0].point.sub(sceneManager.offset));
-		console.log(`after: ${currentAnchorPtMesh.position.y}`)
+		// console.log(`after: ${currentAnchorPtMesh.position.y}`)
 
 		const i = sceneManager.anchorPointList.map(obj => obj.mesh.uuid).indexOf(currentAnchorPtMesh.uuid);
 		if ( i >= 0 ) {
@@ -116,9 +120,15 @@ function onMouseMove ( event ) {
 			// let gridPointsToShow = sceneManager.gridPointList.filter(obj => -1 === gridPointsToHide.indexOf(obj));
 			// gridPointsToShow.map(obj => obj.showGridPoint());
 			eventBus.post("showHideGridPoints");
+			eventBus.post("updateAnchorPoints");
+			eventBus.post("heightSpiralChanges");
+			// eventBus.state.totalHeight = eventBus.state.anchorPointsPosition[0][1] - eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length - 1][1]
+			// eventBus.state.spiralSlope = eventBus.state.heightXslope * eventBus.state.totalHeight;
+			// eventBus.state.spiralResolution = eventBus.state.slopeXres/ eventBus.state.spiralSlope;
 			eventBus.post("buildNewLathe");
 			eventBus.post("buildNewSpiral");
-			eventBus.post("updateAnchorPoints");
+			eventBus.post("buildNewBottomSpiral");
+
 		}
 	} else {
 		const intersects = sceneManager.raycaster.intersectObjects(sceneManager.anchorPointList.map(obj => obj.mesh));
@@ -154,9 +164,14 @@ function onMouseRight( event ) {
 			// sceneManager.selection.position.copy(anchorPointIntersects[0].point.sub(sceneManager.offset));
 			// console.log(`after: ${currentAnchorPtMesh.position.y}`)
 			eventBus.post("deleteAnchorPoint", mouseX,sceneManager.anchorPointList);
+			eventBus.post("updateAnchorPoints");
+			eventBus.post("heightSpiralChanges");
+			// eventBus.state.totalHeight = eventBus.state.anchorPointsPosition[0][1] - eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length - 1][1]
+			// eventBus.state.spiralSlope = eventBus.state.heightXslope * eventBus.state.totalHeight;
+			// eventBus.state.spiralResolution = eventBus.state.slopeXres/eventBus.state.spiralSlope;
 			eventBus.post("buildNewLathe");
 			eventBus.post("buildNewSpiral");
-			eventBus.post("updateAnchorPoints");
+			eventBus.post("buildNewBottomSpiral");
 
 
 			// debugger

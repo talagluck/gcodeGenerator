@@ -1,14 +1,27 @@
 function EventBus() {
-    this.state = {
-        spiralVisible:true,
+    this.state = {      
         latheVisible:false,
         latheOpacity: 0.7,
+
+        spiralVisible: true,
         curveResolution: 5000,
-        spiralResolution: 1000,   
-        spiralSlope: 0.1,
+        spiralResolution: 3000, 
+        curveXspiral: 3/5  ,
+        spiralSlope: 0.01,
+        totalHeight: 20,
+
         anchorPointsPosition:[[10, 10, 0], [10, -10, 0]],
-        slopeXres: 1,
-        // prevState: {}
+        slopeXres: 30,
+        // heightXres: 150,
+        heightXslope: 0.01/20,
+        bottomSpiralVisible:true,
+        bottomSpiralRevolutions:50,
+        bottomSpiralOffset: 0.5,
+        bottomSpiralXZSpeed: 1.5,
+        bottomSpiralYSpeed: 4,
+        bottomSpiralResolution: 360,
+
+
     }
     this.prevState = []
 
