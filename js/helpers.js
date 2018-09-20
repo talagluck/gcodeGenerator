@@ -39,7 +39,7 @@ function convertDimsToMM(spiralPoints){
     return printerPts;
 }
 
-function outputGcode(spiralPoints){
+function outputGcode(spiralPoints, startingExtrusion,layerHeight ){
     //add an option to adjust the z level while extruding. this needs to not apply
     //to the base of the shape, probably, but can otherwise be loose. need to 
     //put together the bottom spiral with the main spiral, but also understand how to keep
@@ -80,21 +80,36 @@ function outputGcode(spiralPoints){
     // M117 Printing...
     spiralPoints = convertDimsToMM(spiralPoints);
     let feedrate = 1200;
-    let curExtrusion = .5;
-    let extrusionRate = 3;
+    let curExtrusion = startingExtrusion;
+    // let extrusionRate = extrusion;
     // const allGcode = "";
     let allGcode = "";
+    let prevPoint = undefined;
+    let distance = .1;
+    let flowModifier = .9;
     //all of the opening gcode
     spiralPoints.forEach(
         (pt) => {
+            if(prevPoint){
+                let deltaX2 = Math.pow(pt.x-prevPoint.x,2);
+                let deltaY2 = Math.pow(pt.y - prevPoint.y, 2);
+                let deltaZ2 = Math.pow(pt.z - prevPoint.z, 2);
+                distance = Math.sqrt(deltaX2 + deltaY2 + deltaZ2);
+            } 
+
+            let increaseExtrusion = (distance * layerHeight * flowModifier) / (Math.PI * 0.5)
+
+            curExtrusion += increaseExtrusion
+
             let gcodeLine = `G1 F${feedrate} `;
             gcodeLine+= `X${pt.x} `;
             gcodeLine+= `Y${pt.z} `;
-            gcodeLine+= `Z${pt.y} `;
+            gcodeLine+= `Z${pt.y + layerHeight} `;
             gcodeLine+= `E${curExtrusion} \n`;
-            curExtrusion+=extrusionRate;
+            // curExtrusion+=extrusionRate;
             // allGcode.push(gcodeLine);
             allGcode+=gcodeLine;
+            prevPoint = pt;
         }
     )
     return allGcode;

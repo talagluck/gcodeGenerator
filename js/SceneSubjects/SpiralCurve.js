@@ -55,7 +55,7 @@ function SpiralCurve(scene, curve, gui) {
     this.catMullPoints = this.catMull.getPoints(spiralResolution);
     this.lineGeo = new THREE.BufferGeometry().setFromPoints(this.catMullPoints);
 
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xff22ff });
 
 
     this.line = new THREE.Line(this.lineGeo,lineMat);

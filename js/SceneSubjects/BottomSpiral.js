@@ -36,12 +36,14 @@ function BottomSpiral(scene, anchorPointList, gui) {
     this.catMullPoints = this.catMull.getPoints(100);
     this.lineGeo = new THREE.BufferGeometry().setFromPoints(this.spiralPoints);
 
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xff11ff });
 
 
     this.line = new THREE.Line(this.lineGeo, lineMat);
 
     scene.add(this.line);
+    this.line.visible = eventBus.state.spiralVisible;
+
 
 
 

@@ -1,4 +1,4 @@
-function Lathe(scene, anchorPointList,resolution, gui, eventBus) {
+function Lathe(scene, anchorPointList,resolution,gui, eventBus) {
     let curvePointList=[]
     // const opacity = 0.2
 
@@ -29,10 +29,11 @@ function Lathe(scene, anchorPointList,resolution, gui, eventBus) {
     this.mesh = new THREE.Mesh(geometry, material);
     // this.line = new THREE.Line(this.lineGeo,lineMat);
     this.mesh.visible = eventBus.state.latheVisible;
+    this.mesh.material.opacity = eventBus.state.latheOpacity;
     scene.add(this.mesh);
     // scene.add(this.line);
-    this.latheVisible = gui.add(this.mesh, 'visible').name('show lathe');
-    this.latheVisible.onFinishChange(()=>{eventBus.state.latheVisible=this.mesh.visible})
+    // this.latheVisible = gui.add(this.mesh, 'visible').name('show lathe');
+    // this.latheVisible.onFinishChange(()=>{eventBus.state.latheVisible=this.mesh.visible})
 
     this.latheOpacity = gui.add(this.mesh.material, 'opacity',0,1).name('opacity');
     this.latheOpacity.onChange(() => { eventBus.state.latheOpacity = this.mesh.material.opacity})

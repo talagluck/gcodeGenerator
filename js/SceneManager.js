@@ -1,5 +1,8 @@
 function SceneManager(canvas) {
-
+    const preload = JSON.parse(prompt("Load pre-existing state?", ""));
+    if(preload){
+        eventBus.state = preload;
+    }
     const segments = 20;
     const screenDimensions = {
         width: canvas.width,
@@ -64,6 +67,14 @@ function SceneManager(canvas) {
         spiralGUI.open();
         bottomSpiralGUI.open();
         
+        latheGUI.add(eventBus.state, 'latheVisible')
+            .name('visible')
+            .onChange(() => eventBus.post('buildNewLathe'));
+
+        // latheGUI.add(eventBus.state, 'latheOpacity', 0.001, 1)
+        //     .name('opacity')
+        //     .onChange(() => eventBus.post('buildNewlathe'));
+        
         // spiralGUI.add(eventBus.state,'curveResolution',1,200)
         //         .name('curve resolution')
         //         .onChange(()=>eventBus.post('buildNewSpiral'));
@@ -73,7 +84,7 @@ function SceneManager(canvas) {
                     eventBus.post('buildNewSpiral')
                     eventBus.state.slopeXres = eventBus.state.spiralResolution*eventBus.state.spiralSlope;
                     eventBus.state.curveResolution = eventBus.state.curveXspiral*eventBus.state.spiralResolution;
-                    console.log('slopeXres', eventBus.state.slopeXres)
+                    // console.log('slopeXres', eventBus.state.slopeXres)
                     // eventBus.state.spiralResolution = eventBus.state.heightXres / eventBus.state.totalHeight;
                     // eventBus.state.spiralSlope = eventBus.state.heightXslope / eventBus.state.totalHeight;
                     // eventBus.state.heightXres = eventBus.state.spiralResolution / eventBus.state.totalHeight;
@@ -98,8 +109,11 @@ function SceneManager(canvas) {
                 .listen();
                 
         spiralGUI.add(eventBus.state, 'spiralVisible')
-                .name('show spiral')
+                .name('visible')
                 .onChange(() => eventBus.post('buildNewSpiral'));
+       
+            
+        
                 
 
         //TODO: this.spiralVisible = gui.add(this.line, 'visible').name('show spiral');
@@ -118,13 +132,13 @@ function SceneManager(canvas) {
     // });
         
 
-        bottomSpiralGUI.add(eventBus.state, 'bottomSpiralRevolutions', 30, 80)
+        bottomSpiralGUI.add(eventBus.state, 'bottomSpiralRevolutions', 10, 80)
                 .name('density')
                 .onChange(() => eventBus.post('buildNewBottomSpiral'));
         bottomSpiralGUI.add(eventBus.state, 'bottomSpiralOffset', 0, 2)
                 .name('height')
                 .onChange(() => eventBus.post('buildNewBottomSpiral'));
-        bottomSpiralGUI.add(eventBus.state, 'bottomSpiralXZSpeed', 1, 4)
+        bottomSpiralGUI.add(eventBus.state, 'bottomSpiralXZSpeed', .1, 4)
                 .name('XZ acceleration')
                 .onChange(() => eventBus.post('buildNewBottomSpiral'));
         bottomSpiralGUI.add(eventBus.state, 'bottomSpiralYSpeed', 1, 8)
@@ -133,6 +147,9 @@ function SceneManager(canvas) {
         bottomSpiralGUI.add(eventBus.state, 'bottomSpiralResolution', 3, 360)
                 .name('resolution')
                 .onChange(() => eventBus.post('buildNewBottomSpiral'));
+        bottomSpiralGUI.add(eventBus.state, 'bottomSpiralVisible')
+            .name('visible')
+            .onChange(() => eventBus.post('buildNewBottomSpiral'));
 
     
 
@@ -235,7 +252,7 @@ function SceneManager(canvas) {
     }
 
     function buildLathe(scene, resolution){
-        lathe = new Lathe(scene, this.anchorPointList, resolution, gui.lathe,eventBus);
+        lathe = new Lathe(scene, this.anchorPointList, resolution,gui.lathe,eventBus);
         return lathe;
     }
     function buildSpiral(scene,lathe, visible){
@@ -308,7 +325,7 @@ function SceneManager(canvas) {
     eventBus.subscribe("buildNewLathe", () => {
         if(this.lathe){
             destroyOnUpdateMesh(this.scene,this.lathe.mesh);
-            gui.lathe.remove(this.lathe.latheVisible);
+            // gui.lathe.remove(this.lathe.latheVisible);
             gui.lathe.remove(this.lathe.latheOpacity);
         }
         this.lathe = buildLathe(this.scene, 50)
