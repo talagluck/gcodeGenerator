@@ -1,4 +1,4 @@
-function BottomSpiral(scene, anchorPointList, gui) {
+function BottomSpiral(scene, anchorPointList) {
     const bottomPoint = anchorPointList[anchorPointList.length-1];
     const bottomPointY = bottomPoint.mesh.position.y
     const bottomPointX = bottomPoint.mesh.position.x

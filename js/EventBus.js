@@ -25,6 +25,14 @@ function EventBus() {
     }
     this.prevState = []
 
+    this.loadState = function (callback) {
+        const preload = JSON.parse(prompt("Load pre-existing state", ""));
+        localStorage.setItem('state', JSON.stringify(preload))
+        if (preload) {
+            eventBus.state = preload;
+        }
+        location = location;
+    }
     this.save = function () {
         let newPrevState = Object.assign({ timestamp: Date.now() }, this.state)
         this.prevState.push(newPrevState);

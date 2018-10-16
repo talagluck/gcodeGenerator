@@ -1,8 +1,13 @@
 function SceneManager(canvas) {
-    const preload = JSON.parse(prompt("Load pre-existing state?", ""));
-    if(preload){
-        eventBus.state = preload;
+    // const preload = JSON.parse(prompt("Load pre-existing state?", ""));
+    // if(preload){
+    //     eventBus.state = preload;
+    // }
+    if(localStorage.getItem('state')){
+        eventBus.state = JSON.parse(localStorage.getItem('state'));
+        localStorage.clear()
     }
+
     const segments = 20;
     const screenDimensions = {
         width: canvas.width,
@@ -17,7 +22,7 @@ function SceneManager(canvas) {
     this.raycaster = new THREE.Raycaster();
     this.plane = new HelperPlane(this.scene, 400, 400 );
     this.offset = new THREE.Vector3();
-    const gui = makeGUI();
+    let gui = makeGUI();
     this.gui = gui;
     this.anchorPointList = createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
@@ -39,7 +44,7 @@ function SceneManager(canvas) {
 
         eventBus.post("deleteAllAnchorPoints")
         eventBus.state = Object.assign({},selectedState);
-        this.anchorPointList = createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);  
+        this.anchorPointList = this.createFirstAnchors(this.scene, eventBus.state.anchorPointsPosition);  
         eventBus.post("buildNewLathe");
         eventBus.post("buildNewSpiral");
         eventBus.post("showHideGridPoints");
@@ -47,26 +52,32 @@ function SceneManager(canvas) {
         // this.gridPointList = makeGridPoints(this.scene, segments);
 
     }
-    gui.root.add(eventBus, 'save').onChange();
+    gui.root.add(eventBus, 'save');
     
     function getAnchorPointsPlacement() {
         eventBus.state.anchorPointsPosition = this.anchorPointList.map(
             anchorPoint => [anchorPoint.mesh.position.x, anchorPoint.mesh.position.y,0]
         )
     }
+    gui.root.add(eventBus, 'loadState');
+    
 
     function makeGUI () {
         const gui = new dat.GUI();
 
         // gui.remember(eventBus.state);
+        const stateGUI = gui.addFolder('State Controls');
         const latheGUI = gui.addFolder('Lathe Controls');
         const spiralGUI = gui.addFolder('Spiral Controls');
         const bottomSpiralGUI = gui.addFolder('Bottom Spiral Controls');
         // const anchorGUI = gui.addFolder('Anchor Points');
         // latheGUI.open();
+        stateGUI.open();
         spiralGUI.open();
         bottomSpiralGUI.open();
         
+        // stateGUI.add(eventBus, 'loadState', this.createFirstAnchors);
+
         latheGUI.add(eventBus.state, 'latheVisible')
             .name('visible')
             .onChange(() => eventBus.post('buildNewLathe'));
@@ -75,38 +86,38 @@ function SceneManager(canvas) {
         //     .name('opacity')
         //     .onChange(() => eventBus.post('buildNewlathe'));
         
-        // spiralGUI.add(eventBus.state,'curveResolution',1,200)
-        //         .name('curve resolution')
-        //         .onChange(()=>eventBus.post('buildNewSpiral'));
-        spiralGUI.add(eventBus.state,'spiralResolution',1000,8000)
-                .name('spiral resolution')
-                .onChange(() => {
-                    eventBus.post('buildNewSpiral')
-                    eventBus.state.slopeXres = eventBus.state.spiralResolution*eventBus.state.spiralSlope;
-                    eventBus.state.curveResolution = eventBus.state.curveXspiral*eventBus.state.spiralResolution;
-                    // console.log('slopeXres', eventBus.state.slopeXres)
-                    // eventBus.state.spiralResolution = eventBus.state.heightXres / eventBus.state.totalHeight;
-                    // eventBus.state.spiralSlope = eventBus.state.heightXslope / eventBus.state.totalHeight;
-                    // eventBus.state.heightXres = eventBus.state.spiralResolution / eventBus.state.totalHeight;
-                //    eventBus.state.heightXslopeXres = eventBus.state.totalHeight*eventBus.state.resXslope ;                
-                })
-                .listen();
+        spiralGUI.add(eventBus.state,'curveResolution',1,5000)
+                .name('curve resolution')
+                .onChange(()=>eventBus.post('buildNewSpiral'));
+        // spiralGUI.add(eventBus.state,'spiralResolution',1000,8000)
+        //         .name('spiral resolution')
+        //         .onChange(() => {
+        //             eventBus.post('buildNewSpiral')
+        //             // eventBus.state.slopeXres = eventBus.state.spiralResolution*eventBus.state.spiralSlope;
+        //             // eventBus.state.curveResolution = eventBus.state.curveXspiral*eventBus.state.spiralResolution;
+        //             // console.log('slopeXres', eventBus.state.slopeXres)
+        //             // eventBus.state.spiralResolution = eventBus.state.heightXres / eventBus.state.totalHeight;
+        //             // eventBus.state.spiralSlope = eventBus.state.heightXslope / eventBus.state.totalHeight;
+        //             // eventBus.state.heightXres = eventBus.state.spiralResolution / eventBus.state.totalHeight;
+        //         //    eventBus.state.heightXslopeXres = eventBus.state.totalHeight*eventBus.state.resXslope ;                
+        //         })
+        //         .listen();
                     
                 
-        spiralGUI.add(eventBus.state, 'spiralSlope', 0.001, 0.01)
+        spiralGUI.add(eventBus.state, 'spiralSlope', .01, .4)
                 .name('spiral density')
                 .onChange(() => {
                     // debugger;
                     // console.log(1, eventBus.state.spiralResolution);
-                    eventBus.state.spiralResolution = eventBus.state.slopeXres/eventBus.state.spiralSlope;
-                    eventBus.state.heightXslope = eventBus.state.spiralSlope / eventBus.state.totalHeight;
-                    console.log('heightXslope', eventBus.state.heightXslope)
+                    // eventBus.state.spiralResolution = eventBus.state.slopeXres/eventBus.state.spiralSlope;
+                    // eventBus.state.heightXslope = eventBus.state.spiralSlope / eventBus.state.totalHeight;
+                    // console.log('heightXslope', eventBus.state.heightXslope)
                     // eventBus.state.heightXres = eventBus.state.spiralResolution / eventBus.state.totalHeight;
                     eventBus.post('buildNewSpiral');
                     // console.log(2,eventBus.state.spiralResolution);
                     
                 })
-                .listen();
+                // .listen();
                 
         spiralGUI.add(eventBus.state, 'spiralVisible')
                 .name('visible')
@@ -166,6 +177,8 @@ function SceneManager(canvas) {
         return guiDict
     }
 
+    
+
     function makeGridPoints (scene, numberSegments) {
         const gridPointList = [];
         const anchorPointYs = this.anchorPointList.map(obj => obj.mesh.position.y)
@@ -209,7 +222,7 @@ function SceneManager(canvas) {
         return anchorPoint
     }
 
-    function createFirstAnchors(scene, startingDims) {
+   function createFirstAnchors(scene, startingDims) {
         anchorPointList = [];
         startingDims.forEach(
             (dims) => {
@@ -220,6 +233,8 @@ function SceneManager(canvas) {
 
         return anchorPointList;
     }
+
+    this.createFirstAnchors = createFirstAnchors
 
     function buildScene() {
         const scene = new THREE.Scene();
@@ -255,13 +270,13 @@ function SceneManager(canvas) {
         lathe = new Lathe(scene, this.anchorPointList, resolution,gui.lathe,eventBus);
         return lathe;
     }
-    function buildSpiral(scene,lathe, visible){
-        spiral = new SpiralCurve(scene, lathe.curve,gui.spiral);
+    function buildSpiral(scene,lathe){
+        spiral = new SpiralCurve(scene, lathe.curve);
         return spiral;
     }
 
     function buildBottomSpiral(scene, anchorPointList, gui){
-        let bottomSpiral = new BottomSpiral(scene, this.anchorPointList, gui);
+        let bottomSpiral = new BottomSpiral(scene, this.anchorPointList);
         return bottomSpiral;
     }
 
@@ -365,13 +380,13 @@ function SceneManager(canvas) {
 )
 
     eventBus.subscribe("heightSpiralChanges", ()=>{
-        console.log('slopeXres', eventBus.state.slopeXres)
-        console.log('heightXslope', eventBus.state.heightXslope)
-        eventBus.state.totalHeight = eventBus.state.anchorPointsPosition[0][1] - eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length - 1][1]
-        eventBus.state.spiralSlope = eventBus.state.heightXslope * eventBus.state.totalHeight;
-        eventBus.state.spiralResolution = eventBus.state.slopeXres / eventBus.state.spiralSlope;
-        eventBus.state.curveResolution = eventBus.state.curveXspiral * eventBus.state.spiralResolution;
-        console.log('curveRes', eventBus.state.curveResolution)
+        // console.log('slopeXres', eventBus.state.slopeXres)
+        // console.log('heightXslope', eventBus.state.heightXslope)
+        // eventBus.state.totalHeight = eventBus.state.anchorPointsPosition[0][1] - eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length - 1][1]
+        // eventBus.state.spiralSlope = eventBus.state.heightXslope * eventBus.state.totalHeight;
+        // eventBus.state.spiralResolution = eventBus.state.slopeXres / eventBus.state.spiralSlope;
+        // eventBus.state.curveResolution = eventBus.state.curveXspiral * eventBus.state.spiralResolution;
+        // console.log('curveRes', eventBus.state.curveResolution)
 
 
     })

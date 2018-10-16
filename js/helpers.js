@@ -9,13 +9,13 @@ function destroyOnUpdateMesh(scene, mesh) {
 function convertDimsToMM(spiralPoints){
     spiralMinX = -50;
     spiralMaxX = 50;
-    spiralMinY = -50;
+    // spiralMinY = -50;
     spiralMaxY = 50;
     spiralMinZ = -50;
     spiralMaxZ = 50;
     // spiralMinX = Math.min(...pts.map((pt) => pt.x))
     // spiralMaxX = Math.max(...pts.map((pt) => pt.x))
-    // spiralMinY = Math.min(...pts.map((pt) => pt.y))
+    spiralMinY = Math.min(...spiralPoints.map((pt) => pt.y))
     // spiralMaxY = Math.max(...pts.map((pt) => pt.y))
     // spiralMinZ = Math.min(...pts.map((pt) => pt.z))
     // spiralMaxZ = Math.max(...pts.map((pt) => pt.z))
@@ -39,7 +39,7 @@ function convertDimsToMM(spiralPoints){
     return printerPts;
 }
 
-function outputGcode(spiralPoints, startingExtrusion,layerHeight ){
+function outputGcode(spiralPoints, startingExtrusion,layerHeight,feedrate ){
     //add an option to adjust the z level while extruding. this needs to not apply
     //to the base of the shape, probably, but can otherwise be loose. need to 
     //put together the bottom spiral with the main spiral, but also understand how to keep
@@ -79,14 +79,14 @@ function outputGcode(spiralPoints, startingExtrusion,layerHeight ){
     //     ; Put printing message on LCD screen
     // M117 Printing...
     spiralPoints = convertDimsToMM(spiralPoints);
-    let feedrate = 1200;
+    // let feedrate = 1200;
     let curExtrusion = startingExtrusion;
     // let extrusionRate = extrusion;
     // const allGcode = "";
     let allGcode = "";
     let prevPoint = undefined;
     let distance = .1;
-    let flowModifier = .9;
+    let flowModifier = 1;
     //all of the opening gcode
     spiralPoints.forEach(
         (pt) => {

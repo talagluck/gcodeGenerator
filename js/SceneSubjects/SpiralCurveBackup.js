@@ -1,43 +1,41 @@
-function SpiralCurve(scene, curve) {
+function SpiralCurve(scene, curve, gui) {
     this.curve = curve;
     // const revolutions = 20;
     
-    const curveResolution = Math.floor(eventBus.state.curveResolution);
+    const curveResolution = eventBus.state.curveResolution;
     const spiralResolution = eventBus.state.spiralResolution;
-    const points = this.curve.getSpacedPoints(curveResolution);
-    
+    const points = this.curve.getPoints(curveResolution);
     // const bottomY = this.curve.points[this.curve.points.length-1].y;
     const bottomY = eventBus.state.anchorPointsPosition[eventBus.state.anchorPointsPosition.length-1][1];
-
-    // const totalHeight = eventBus.state.totalHeight;
+    // const topY = this.curve.points[0].y;
+    // const totalHeight = topY - bottomY;
+    const totalHeight = eventBus.state.totalHeight;
     const slope = eventBus.state.spiralSlope;
-    // const curveLength = this.curve.getLength()
-    // let deltaS = curveLength / curveResolution;
+    let deltaY = totalHeight / spiralResolution;
 
-    let deltaT = slope;
+    let deltaT = deltaY / slope;
     
     this.spiralPoints = [];
     
 
 
-    // let getRadius = function(pointList,y) {
-    //     for(i=0;i<pointList.length;i++){
-    //         if(y>=pointList[i].y){
-    //             // debugger;
-    //             // console.log(pointList[i]);
-    //             return pointList[i].x;
-    //         }
-    //     }
-    // }
+    let getRadius = function(pointList,y) {
+        for(i=0;i<pointList.length;i++){
+            if(y>=pointList[i].y){
+                // debugger;
+                // console.log(pointList[i]);
+                return pointList[i].x;
+            }
+        }
+    }
 
 
-    for (let k = curveResolution; k >= 0; k--) {
-        // console.log(k)
+    for (let k = 0; k < spiralResolution+1; k++) {
+        
         // let curY = points[k].y;
         let t = k * deltaT;
-        // console.log(points[k])
-        let y = points[k].y
-        let curRadius = points[k].x   
+        let y = bottomY + slope * t
+        let curRadius = getRadius(points, y);   
         let x = curRadius * Math.cos(t);
         let z = curRadius * Math.sin(t);
 
@@ -49,7 +47,7 @@ function SpiralCurve(scene, curve) {
     // }
 
     this.catMull = new THREE.CatmullRomCurve3(this.spiralPoints);
-    this.catMullPoints = this.catMull.getPoints(curveResolution);
+    this.catMullPoints = this.catMull.getPoints(spiralResolution);
     this.lineGeo = new THREE.BufferGeometry().setFromPoints(this.catMullPoints);
 
     const lineMat = new THREE.LineBasicMaterial({ color: 0xff22ff });

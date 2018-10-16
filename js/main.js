@@ -1,5 +1,5 @@
 const canvas = document.getElementById("canvas");
-const sceneManager = new SceneManager(canvas);
+let sceneManager = new SceneManager(canvas);
 
 bindEventListeners();
 render();
@@ -100,10 +100,11 @@ function onMouseMove ( event ) {
 
 		const i = sceneManager.anchorPointList.map(obj => obj.mesh.uuid).indexOf(currentAnchorPtMesh.uuid);
 		if ( i >= 0 ) {
-			const top = i == 0 ? maxY : sceneManager.anchorPointList[i - 1].mesh.position.y;
-			const bottom = i == sceneManager.anchorPointList.length - 1 ? minY : sceneManager.anchorPointList[i + 1].mesh.position.y;
-	
-			if (currentAnchorPtMesh.position.x < minX) { currentAnchorPtMesh.position.x = minX; }
+			// const top = i == 0 ? maxY : sceneManager.anchorPointList[i - 1].mesh.position.y;
+			// const bottom = i == sceneManager.anchorPointList.length - 1 ? minY : sceneManager.anchorPointList[i + 1].mesh.position.y;
+			const top = maxY;
+			const bottom = minY;
+			// if (currentAnchorPtMesh.position.x < minX) { currentAnchorPtMesh.position.x = minX; }
 			if (currentAnchorPtMesh.position.x > maxX) { currentAnchorPtMesh.position.x = maxX; }
 			if (currentAnchorPtMesh.position.y >= top - 1) { currentAnchorPtMesh.position.y = top - 1; }
 			if (currentAnchorPtMesh.position.y <= bottom + 1) { currentAnchorPtMesh.position.y = bottom + 1; }

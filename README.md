@@ -1,2 +1,2 @@
 # gcodeGenerator
-Some experiments with three.js and javascript, with the ultimate goal of generating gcode for a 3dprinter in the vein of David Lobser's Vessel project.
+An alternative way of generating g-code for a 3D printer, in the vein of David Lobser's Vessel Project
