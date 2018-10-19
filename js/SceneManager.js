@@ -28,6 +28,7 @@ function SceneManager(canvas) {
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     this.gridPointList = makeGridPoints(this.scene, segments);
     
+    this.marker = new DimensionMarker(this.scene, 'ok', 0, 0, 0);
 
     this.lathe = buildLathe(this.scene,50);
     this.spiral = buildSpiral(this.scene, this.lathe);
