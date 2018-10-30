@@ -13,8 +13,8 @@ function SceneManager(canvas) {
         width: canvas.width,
         height: canvas.height
     }
-
     this.scene = buildScene();
+    const textTest = new GridDimensions(this.scene,150,2,-50,-50,0);
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
     this.camera = buildCamera(screenDimensions);
@@ -262,7 +262,7 @@ function SceneManager(canvas) {
         const nearPlane = 1;
         const farPlane = 1000;
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
-        camera.position.z = -100;
+        camera.position.z = 100;
       	camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     }
