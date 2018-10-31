@@ -14,7 +14,7 @@ function SceneManager(canvas) {
         height: canvas.height
     }
     this.scene = buildScene();
-    const textTest = new GridDimensions(this.scene,150,2,-50,-50,0);
+    this.gridDimensions = new GridDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0);
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
     this.camera = buildCamera(screenDimensions);
@@ -61,7 +61,7 @@ function SceneManager(canvas) {
         )
     }
     gui.root.add(eventBus, 'loadState');
-    
+ 
 
     function makeGUI () {
         const gui = new dat.GUI();
@@ -71,13 +71,20 @@ function SceneManager(canvas) {
         const latheGUI = gui.addFolder('Lathe Controls');
         const spiralGUI = gui.addFolder('Spiral Controls');
         const bottomSpiralGUI = gui.addFolder('Bottom Spiral Controls');
+        const printerGUI = gui.addFolder('Printer Controls');
         // const anchorGUI = gui.addFolder('Anchor Points');
         // latheGUI.open();
         stateGUI.open();
         spiralGUI.open();
-        bottomSpiralGUI.open();
+        printerGUI.open();
+        // bottomSpiralGUI.open();
         
         // stateGUI.add(eventBus, 'loadState', this.createFirstAnchors);
+
+        printerGUI.add(eventBus.state, 'printerScale',0.1,4)
+            .onChange(()=>eventBus.post('redrawDims'));
+        printerGUI.add(eventBus.state, 'printerMax',50,300)
+            .onChange(() => eventBus.post('redrawDims'));
 
         latheGUI.add(eventBus.state, 'latheVisible')
             .name('visible')
@@ -281,6 +288,12 @@ function SceneManager(canvas) {
         return bottomSpiral;
     }
 
+    function drawDimensions(scene, maxMM, size, originX, originY, originZ) {
+
+        let gridDimensions = new GridDimensions(scene, maxMM, size, originX, originY, originZ)
+        return gridDimensions;
+    }
+
     function buildLights(scene) {
         // distance, x, y, z
         const cameraParams = [
@@ -297,6 +310,15 @@ function SceneManager(canvas) {
         return lights
     }
 
+    eventBus.subscribe("redrawDims", () => {
+        if (this.gridDimensions) {
+            this.gridDimensions.allDims.forEach(
+                (obj) => destroyOnUpdateMesh(this.scene, obj.mesh)
+            )
+        }
+        this.gridDimensions = drawDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0)
+
+    })
     eventBus.subscribe("updateAnchorPoints", getAnchorPointsPlacement);
     
     eventBus.subscribe("addAnchorPoint", ([newAnchorPtX, newAnchorPtY]) => {

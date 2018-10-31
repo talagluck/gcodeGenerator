@@ -20,6 +20,8 @@ function EventBus() {
         bottomSpiralXZSpeed: 1.5,
         bottomSpiralYSpeed: 4,
         bottomSpiralResolution: 360,
+        printerScale: 1,
+        printerMax:150,
 
 
     }

@@ -5,12 +5,12 @@ function DimensionMarker(scene, dimText, size, x, y, z, rotate=null) {
 
     loader.setPath('./js/SceneSubjects')
 
-    loader.load('/helvetikerFont.json', function (font) {
+    loader.load('/helvetikerFont.json', (font) => {
 
         var geometry = new THREE.TextGeometry(dimText, {
             font: font,
             size: size,
-            height: 0,
+            height: 0.1,
             curveSegments: 12,
             // bevelEnabled: true,
             // bevelThickness: 10,
@@ -19,14 +19,14 @@ function DimensionMarker(scene, dimText, size, x, y, z, rotate=null) {
         });
 
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        var mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(x, y, z);
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.position.set(x, y, z);
         if(rotate){
-            mesh.rotation.z=-Math.PI/3.75
+            this.mesh.rotation.z=-Math.PI/3.75
         }
 
 
-        scene.add(mesh);
+        scene.add(this.mesh);
     });   
     this.update = function () {}
 
