@@ -1,8 +1,11 @@
 const canvas = document.getElementById("canvas");
 let sceneManager = new SceneManager(canvas);
+console.log(canvas.width, canvas.height);
 
 bindEventListeners();
 render();
+console.log(canvas.width, canvas.height);
+
 
 
 function anchorPointBounds(anchorPoint) {

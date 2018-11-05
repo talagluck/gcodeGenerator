@@ -10,11 +10,11 @@ function EventBus() {
         spiralSlope: 0.01,
         totalHeight: 20,
 
-        anchorPointsPosition:[[10, 10, 0], [10, -10, 0]],
+        anchorPointsPosition:[[-10, 10, 0], [-10, -10, 0]],
         slopeXres: 30,
         // heightXres: 150,
         heightXslope: 0.01/20,
-        bottomSpiralVisible:true,
+        bottomSpiralVisible:false,
         bottomSpiralRevolutions:50,
         bottomSpiralOffset: 0.5,
         bottomSpiralXZSpeed: 1.5,

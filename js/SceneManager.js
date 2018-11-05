@@ -13,10 +13,11 @@ function SceneManager(canvas) {
         width: canvas.width,
         height: canvas.height
     }
+
     this.scene = buildScene();
-    this.gridDimensions = new GridDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0);
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
+    this.gridDimensions = new GridDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0);
     this.camera = buildCamera(screenDimensions);
     this.controls = new THREE.OrbitControls( this.camera,canvas);
     this.raycaster = new THREE.Raycaster();
@@ -28,12 +29,34 @@ function SceneManager(canvas) {
     this.gridPlane = new GridPlane(this.scene, 100, 0x333333, segments)
     this.gridPointList = makeGridPoints(this.scene, segments);
     
-    this.marker = new DimensionMarker(this.scene, 'ok', 0, 0, 0);
+    // this.marker = new DimensionMarker(this.scene, 'ok', 0, 0, 0);
 
     this.lathe = buildLathe(this.scene,50);
     this.spiral = buildSpiral(this.scene, this.lathe);
     this.bottomSpiral = buildBottomSpiral(this.scene,this.anchorPointList,this.gui);
 
+    // let bAT = document.getElementById("bottomAnchor");
+    // let tAT = document.getElementById("topAnchor");
+    // let cT = document.getElementById("center");
+
+    // let newVec = projectToScreen(this.anchorPointList[0].mesh, this.camera, canvas);
+    // newLeft = newVec.x;
+    // newTop = newVec.y;
+    // bAT.style.top = newTop + 'px';
+    // bAT.style.left = newLeft + 'px';
+
+    // newVec = projectToScreen(this.anchorPointList[1].mesh, this.camera, canvas);
+    // newLeft = newVec.x;
+    // newTop = newVec.y;
+    // tAT.style.top = newTop + 'px';
+    // tAT.style.left = newLeft + 'px';
+
+    // newVec = projectToScreen(this.anchorPointList[2].mesh, this.camera, canvas);
+    // newLeft = newVec.x;
+    // newTop = newVec.y;
+    // cT.style.top = newTop + 'px';
+    // cT.style.left = newLeft + 'px';
+    // console.log(canvas.width, canvas.height);
 
     this.redrawOptions = ''
     this.redraw = () => {
@@ -193,7 +216,7 @@ function SceneManager(canvas) {
         for (let i = 0; i <= numberSegments; i++) {
             // if anchorpoint not nearby
             let yDim = (i * 5) - 50;
-            let gridPoint = new GridPoint(scene, numberSegments, 10, yDim, 0);
+            let gridPoint = new GridPoint(scene, numberSegments, -10, yDim, 0);
 
             anchorPointYs.forEach( 
                 (anchorPoint) => {
@@ -269,7 +292,7 @@ function SceneManager(canvas) {
         const nearPlane = 1;
         const farPlane = 1000;
         const camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
-        camera.position.z = 100;
+        camera.position.z = 180;
       	camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     }
@@ -423,8 +446,23 @@ function SceneManager(canvas) {
         if(this.grid){
             this.grid.update(this.scene)
         }
-
         renderer.render(this.scene, this.camera);
+
+        let bAT = document.getElementById("bottomAnchor");
+        let tAT = document.getElementById("topAnchor");
+
+        let newVec = projectToScreen(this.anchorPointList[0].mesh, this.camera, canvas);
+        newLeft = newVec.x;
+        newTop = newVec.y;
+        bAT.style.top = newTop + 'px';
+        bAT.style.left = newLeft + 'px';
+
+        newVec = projectToScreen(this.anchorPointList[1].mesh, this.camera, canvas);
+        newLeft = newVec.x;
+        newTop = newVec.y;
+        tAT.style.top = newTop + 'px';
+        tAT.style.left = newLeft + 'px';
+        console.log(canvas.width, canvas.height);
     }
 
     this.onWindowResize = function() {
