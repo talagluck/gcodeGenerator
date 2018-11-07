@@ -7,30 +7,11 @@ html, body {
     padding: 0;
 }
 
-#bottomAnchor {
+.dimMarker {
     position: absolute;
-    color: aquamarine;
-    top:750px;
-    left:1500px;
-    width:100%;
+    color: red;
     z-index: 100;
     display:block;
-}
-#topAnchor {
-    position: absolute;
-    color: aquamarine;
-    top:750px;
-    left:1500px;
-    width:100%;
-    z-index: 100;
-    display:block;
-}
-#center {
-    position: absolute;
-    color: aquamarine;
-    top:750px;
-    left:1500px;
-    width:100%;
-    z-index: 100;
-    display:block;
+    font-family: 'Arial';
+    /* transform-origin: 0%; */
 }

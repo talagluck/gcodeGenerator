@@ -5,13 +5,12 @@ function destroyOnUpdateMesh(scene, mesh) {
     mesh = undefined; // garbage collecting?
 }
 
-function projectToScreen(object, camera, canvas){
+function projectToScreen(x,y,z, camera){
     const vector = new THREE.Vector3();
-    ptX = object.position.x;
-    ptY = object.position.y;
-    ptZ = object.position.z;
+    ptX = x;
+    ptY = y;
+    ptZ = z;
     vector.set(ptX,ptY,ptZ);
-    console.log(canvas.width,canvas.height)    
     //map to normalized device coordinate space
     camera.updateMatrixWorld();
     vector.project(camera);
@@ -23,10 +22,9 @@ function projectToScreen(object, camera, canvas){
     // console.log(vector.x,vector.y,vector.z)
     //
     vector.x = Math.round((vector.x+1)/2 * window.innerWidth);
-    vector.y = Math.round((vector.y+1)/2 * window.innerHeight);
+    vector.y = Math.round((-vector.y+1)/2 * window.innerHeight);
     vector.z = 0;
     // debugger;
-    console.log(vector.x,vector.y,vector.z);
     return vector;
 }
 

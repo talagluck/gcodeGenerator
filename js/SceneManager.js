@@ -17,7 +17,7 @@ function SceneManager(canvas) {
     this.scene = buildScene();
     const renderer = buildRender(screenDimensions);
     const lights = buildLights(this.scene);
-    this.gridDimensions = new GridDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0);
+    // this.gridDimensions = new GridDimensions(this.scene,eventBus.state.printerMax*eventBus.state.printerScale,2,-50,-50,0);
     this.camera = buildCamera(screenDimensions);
     this.controls = new THREE.OrbitControls( this.camera,canvas);
     this.raycaster = new THREE.Raycaster();
@@ -447,22 +447,24 @@ function SceneManager(canvas) {
             this.grid.update(this.scene)
         }
         renderer.render(this.scene, this.camera);
+        let gridDims = new GridDimensions(this.camera, 150, 40, -50, -50, 0);
 
-        let bAT = document.getElementById("bottomAnchor");
-        let tAT = document.getElementById("topAnchor");
 
-        let newVec = projectToScreen(this.anchorPointList[0].mesh, this.camera, canvas);
-        newLeft = newVec.x;
-        newTop = newVec.y;
-        bAT.style.top = newTop + 'px';
-        bAT.style.left = newLeft + 'px';
+        // let bAT = document.getElementById("bottomAnchor");
+        // let tAT = document.getElementById("topAnchor");
 
-        newVec = projectToScreen(this.anchorPointList[1].mesh, this.camera, canvas);
-        newLeft = newVec.x;
-        newTop = newVec.y;
-        tAT.style.top = newTop + 'px';
-        tAT.style.left = newLeft + 'px';
-        console.log(canvas.width, canvas.height);
+        // let newVec = projectToScreen(this.anchorPointList[0].mesh, this.camera, canvas);
+        // newLeft = newVec.x;
+        // newTop = newVec.y;
+        // bAT.style.top = newTop + 'px';
+        // bAT.style.left = newLeft + 'px';
+
+        // newVec = projectToScreen(this.anchorPointList[1].mesh, this.camera, canvas);
+        // newLeft = newVec.x;
+        // newTop = newVec.y;
+        // tAT.style.top = newTop + 'px';
+        // tAT.style.left = newLeft + 'px';
+        // console.log(canvas.width, canvas.height);
     }
 
     this.onWindowResize = function() {
